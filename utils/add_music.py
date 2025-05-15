@@ -3,6 +3,7 @@ from .log import log
 import discord
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
+
 RESPONSES = [
     "No spotify link in message.",
     "No such track."

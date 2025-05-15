@@ -20,16 +20,11 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 command_tree = discord.app_commands.CommandTree(client)
 
-
-SPECIAL_CHANNELS = {
-    const.MUSIC_CHANNEL: process_message_for_music,  # music channel
-    const.GIF_WARS_CHANNEL: on_message_gif_channel,  # gif-wars channel
-    const.GOOFING_AROUND: lambda x, y: 0  # ignore
-}
-
 # init the spotipy
 SPOTIFY_CLIENT = spotify_init.init_sp(config['spotify']['clientId'], config['spotify']['clientSecret'])
 
+
+# ------------------------------------------------------------ EVENTS ------------------------------------------------------------
 @client.event
 async def on_ready():
     await command_tree.sync(guild=discord.Object(id=const.SERVER_ID))
@@ -56,9 +51,9 @@ async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
     # print(f"{user.name} reacted with {reaction.emoji}")
     pass
 
-
+# ------------------------------------------------------------ COMMANDS ------------------------------------------------------------
 @command_tree.context_menu(
-    name='add-music',
+    name='Add music',
     guild=discord.Object(id=const.SERVER_ID)
 )
 async def add_music(interaction: discord.Interaction, message: discord.Message):
@@ -66,7 +61,7 @@ async def add_music(interaction: discord.Interaction, message: discord.Message):
     code, response = await music_add(message, SPOTIFY_CLIENT)
 
     if code == 1:
-        await interaction.followup.send("This message  does not contain a spotify link.")
+        await interaction.followup.send("This message does not contain a spotify link.")
     elif code == -1:
         await interaction.followup.send("This track was already shared before!")
     elif code == 0:
@@ -77,4 +72,5 @@ async def add_music(interaction: discord.Interaction, message: discord.Message):
         await interaction.followup.send(response)
 
 
+# ------------------------------------------------------------ DISCORD RUN ------------------------------------------------------------
 client.run(config['discord']['token'])
