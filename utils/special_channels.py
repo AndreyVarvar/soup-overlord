@@ -5,7 +5,6 @@ async def process_message_for_music(message: discord.Message, spotipy_client):
     code, response = await add_music(message, spotipy_client)
 
     if code == 1:
-        print("normal message.", "'" + message.content + "'")
         pass
     elif code == -1:
         message.reply("This track was already shared before!")

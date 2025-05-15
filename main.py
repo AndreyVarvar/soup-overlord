@@ -57,20 +57,24 @@ async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
     pass
 
 
-@command_tree.command(
+@command_tree.context_menu(
     name='add-music',
-    description='add music from another message to the database',
     guild=discord.Object(id=const.SERVER_ID)
 )
-async def add_music(interaction: discord.Interaction, message_id: str):
-    await interaction.response.defer(ephemeral=True)
-    try:
-        message = await interaction.channel.fetch_message(int(message_id))
-        print(message)
-        await music_add(message, SPOTIFY_CLIENT)
-        await interaction.followup.send("Successful command invocation.", ephemeral=True)
-    except discord.errors.NotFound:
-        await interaction.followup.send("Invalid 'message_id'.", ephemeral=True)
+async def add_music(interaction: discord.Interaction, message: discord.Message):
+    await interaction.response.defer()
+    code, response = await music_add(message, SPOTIFY_CLIENT)
+
+    if code == 1:
+        await interaction.followup.send("This message  does not contain a spotify link.")
+    elif code == -1:
+        await interaction.followup.send("This track was already shared before!")
+    elif code == 0:
+        await interaction.followup.send(response)
+        await message.add_reaction("<:confirmed:1291384088950997032>")  # make a visual cue everything is okay
+
+    elif code == 2:
+        await interaction.followup.send(response)
 
 
 client.run(config['discord']['token'])
