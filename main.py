@@ -2,8 +2,6 @@ import discord
 import json
 
 from utils import spotify_init
-from utils.add_music import add_music as music_add
-from utils import const
 
 from src import events
 from src import commands

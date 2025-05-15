@@ -7,7 +7,7 @@ def init_events(client, command_tree, spotify_client):
     @client.event
     async def on_ready():
         await command_tree.sync(guild=discord.Object(id=const.SERVER_ID))
-        log("\n")
+        log("\n", timestamp=False)
         log("Bot startup")
 
     @client.event
