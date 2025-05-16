@@ -1,6 +1,7 @@
 import sqlite3
 from .log import log
 import discord
+import spotipy
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
 
@@ -9,7 +10,7 @@ RESPONSES = [
     "No such track."
 ]
 
-async def add_music(message: discord.Message, spotipy_client):
+async def add_music(message: discord.Message, spotipy_client: spotipy.Spotify):
     """
     STEP 1: verify, that the message contains a spotify link
     STEP 2: verify, that the song/music exists on spotify
@@ -27,16 +28,6 @@ async def add_music(message: discord.Message, spotipy_client):
         if SPOTIFY_LINK_IDENTIFIER in s:
             links.append(s)
     
-    names: list[str] = []
-    artists: list[str] = []
-    for link in links:
-        try:
-            track = spotipy_client.track(link)
-        except:
-            return [-1, RESPONSES[1]]
-
-        names.append(track['name'])
-        artists.append(track['artists'][0]['name'])  # we take the name of the first artist that shows up
 
     # step 3
     response = [2, ""]
@@ -44,21 +35,31 @@ async def add_music(message: discord.Message, spotipy_client):
     with sqlite3.connect("databases/spotify.sqlite") as connection:
         cursor = connection.cursor()
         select_query = "SELECT * FROM spotifies WHERE TrackName=? AND TrackAuthor=?;"
-        for i in range(len(names)):
-            data = cursor.execute(select_query, (names[i], artists[i])).fetchall()
+        for link in links:
+
+            try:
+                track = spotipy_client.track(link)
+            except:
+                response[1] += f"Track `{link.split(SPOTIFY_LINK_IDENTIFIER)[1]}` does not exist." + "\n"
+                continue
+
+            name = track['name']
+            artist = track['artists'][0]['name']  # we take the name of the first artist that shows up
+            
+            data = cursor.execute(select_query, (name, artist)).fetchall()
 
             if len(data) > 0:
-                response[1] += f"Track `{names[i]}` by `{artists[i]}` was shared before!" + "\n"
+                response[1] += f"Track `{name}` by `{artist}` was shared before!" + "\n"
                 continue # this track is already in the database
     
         # step 4
             cursor.execute(
                 "INSERT INTO spotifies (TrackName, TrackAuthor, OriginalSender, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)", 
-                (names[i], artists[i], message.author.name, str(message.created_at), str(message.created_at))
+                (name, artist, message.author.name, str(message.created_at), str(message.created_at))
             )
 
-            log(f"Added `{names[i]}` by `{artists[i]}` to the music database.")
+            log(f"Added `{name}` by `{artist}` to the music database.")
             response[0] = 0
-            response[1] += f"Track `{names[i]}` by `{artists[i]}` was successfully added to the database." + "\n"
+            response[1] += f"Track `{name}` by `{artist}` was successfully added to the database." + "\n"
 
     return response
