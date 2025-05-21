@@ -178,3 +178,4 @@ config.json
 logs/
 databases/
 backups/
+.DS_Store
