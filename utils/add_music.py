@@ -3,48 +3,44 @@ from .log import log
 import discord
 import spotipy
 
-SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
+from .music_utils import spotify_link_in_message, get_all_links_in_message, get_track, get_track_info
 
 RESPONSES = [
     "No spotify link in message.",
     "No such track."
 ]
 
-async def add_music(message: discord.Message, spotipy_client: spotipy.Spotify):
+async def add_music_to_database(message: discord.Message, spotipy_client: spotipy.Spotify):
     """
     STEP 1: verify, that the message contains a spotify link
     STEP 2: verify, that the song/music exists on spotify
     STEP 3: check, if this track was shared before
     STEP 4: add the track to the spotify database
     """
+
     # step 1
-    if SPOTIFY_LINK_IDENTIFIER not in message.content:
+    if not spotify_link_in_message(message):
         return [1, RESPONSES[0]]  # no need to go further, this is a normal message (we hope)
     
     # step 2
-    links = []
-    singular_words = (' '.join(message.content.split('\n'))).split()
-    for s in singular_words:
-        if SPOTIFY_LINK_IDENTIFIER in s:
-            links.append(s)
-    
+    links = get_all_links_in_message(message)
 
     # step 3
-    response = [2, ""]
+    response = [2, ""]  # prepare a response ahead of time
 
     with sqlite3.connect("databases/spotify.sqlite") as connection:
         cursor = connection.cursor()
         select_query = "SELECT * FROM spotifies WHERE TrackName=? AND TrackAuthor=?;"
+
         for link in links:
 
-            try:
-                track = spotipy_client.track(link)
-            except:
-                response[1] += f"Track `{link.split(SPOTIFY_LINK_IDENTIFIER)[1]}` does not exist." + "\n"
+            track = get_track(link, spotipy_client)
+
+            if track is None:
+                response[1] += f"Track `{link}` does not exist." + "\n"
                 continue
 
-            name = track['name']
-            artist = track['artists'][0]['name']  # we take the name of the first artist that shows up
+            name, artist = get_track_info(track)
             
             data = cursor.execute(select_query, (name, artist)).fetchall()
 
@@ -54,8 +50,8 @@ async def add_music(message: discord.Message, spotipy_client: spotipy.Spotify):
     
         # step 4
             cursor.execute(
-                "INSERT INTO spotifies (TrackName, TrackAuthor, OriginalSender, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)", 
-                (name, artist, message.author.name, str(message.created_at), str(message.created_at))
+                "INSERT INTO spotifies (TrackName, TrackAuthor, OriginalSender, createdAt, updatedAt, Votes, Voters) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                (name, artist, message.author.name, str(message.created_at), str(message.created_at), None, None)
             )
 
             log(f"Added `{name}` by `{artist}` to the music database.")
