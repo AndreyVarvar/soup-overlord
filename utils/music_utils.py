@@ -1,6 +1,7 @@
 import discord
 import spotipy
 import sqlite3
+from utils.log import log
 
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
@@ -65,19 +66,30 @@ def database_update_votes_and_voters(name, artist, new_vote, new_voter):
         voters = data[6]
 
 
-        if voters is not None and new_voter in voters:
-            return  # last line of defense against multiple votes from the same voter
+        if votes is None and voters is None:  # this track has no votes
+            updated_votes = '' + new_vote
+            updated_voters = '' + new_voter
+            log(f'`{new_voter}` is the first who voted for `{name}` by `{artist}` with a{"n" if new_vote=="8" else ""} `{new_vote}`')
+
+        elif new_voter not in voters:  # the track has votes, but this person has not voted yet
+            updated_votes += ' ' + new_vote
+            updated_voters += ' ' + new_voter
+            log(f'`{new_voter}` voted `{new_vote}` for `{name}` by `{artist}`')
         
-        if votes is None:
-            votes = ''
+        elif new_voter in voters:  # a person already voted on this track, so we just change an existing vote
+            voter_index = voters.split().index(new_voter)
+            
+            v = votes.split()
+            updated_votes = ' '.join(v[:voter_index] + [new_vote] + v[voter_index+1:])
 
-        votes += ' ' + new_vote
+            updated_voters = voters
 
+            log(f'`{new_voter}` changed their vote with a{"n" if new_vote=="8" else ""} `{new_vote}` for `{name}` by `{artist}`')
 
-        if voters is None:
-            voters = ''
-    
-        voters += ' ' + new_voter
 
         update_query = 'UPDATE spotifies SET Votes=?, Voters=? WHERE TrackName=? AND TrackAuthor=?'
-        cursor.execute(update_query, (votes, voters, name, artist))
+        cursor.execute(update_query, (updated_votes, updated_voters, name, artist))
+
+
+def track_in_database(name, artist):
+    return len(database_fetch_info(name, artist)) > 0

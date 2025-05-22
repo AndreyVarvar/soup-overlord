@@ -21,10 +21,13 @@ def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client
             await interaction.followup.send("This track was already shared before!")
         elif code == 0:
             await interaction.followup.send(response)
-            await message.add_reaction("<:confirmed:1291384088950997032>")  # make a visual cue everything is okay
+            await message.add_reaction("⭐️")  # make a visual cue everything is okay
 
         elif code == 2:
             await interaction.followup.send(response)
+
+    
+
 
     
     @command_tree.context_menu(
@@ -47,21 +50,72 @@ def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client
             return
 
         name, artist = music_utils.get_track_info(track)
-        votes, voters = music_utils.database_fetch_votes_and_voters(name, artist)
+
+        # check if the track exists in the database
+        if not music_utils.track_in_database(name, artist):
+            await interaction.followup.send("Add the track to the database first. Use 'Add music' for that")
+            return
 
         original_sender = music_utils.database_fetch_original_sender(name, artist)
 
         voter = interaction.user.name
-
-        if voters is not None and voter in voters:
-            await interaction.followup.send("You already voted on this track")
-            return
         
         if voter == original_sender:
             await interaction.followup.send("You can't vote on your own track")
             return
         
         await interaction.followup.send(f'What would you rate `{name}` by `{artist}`?', view=RateMusicView(name, artist, voter))
+
+
+
+
+    @command_tree.context_menu(
+        name='Get rating',
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    async def get_rating(interaction: discord.Interaction, message: discord.Message):
+        await interaction.response.defer(ephemeral=True)
+
+        if not music_utils.spotify_link_in_message(message):
+            await interaction.followup.send("This message is not a spotify link")
+            return
+        
+        link = music_utils.get_all_links_in_message(message)[0]
+
+        track = music_utils.get_track(link, spotify_client)
+
+        if track is None:
+            await interaction.followup.send("This track has no ratings because it doesn't even exist")
+            return
+
+        name, artist = music_utils.get_track_info(track)
+
+        if not music_utils.track_in_database(name, artist):
+            await interaction.followup.send("Add this track to the database first using 'Add music' before getting a rating")
+            return
+
+        votes, voters = music_utils.database_fetch_votes_and_voters(name, artist)
+        votes = list(map(int, votes.split())) if votes is not None else []
+        voters = voters.split() if voters is not None else []
+
+        original_sender = music_utils.database_fetch_original_sender(name, artist)
+
+        embed = discord.Embed(
+            color=discord.Color.dark_gold(),
+            title=f'Ratings for `{name}` by `{artist}`'
+        )
+
+        embed.set_author(name=original_sender)
+        
+        if len(votes) == 0:
+            embed.set_footer(text='There are no votes for this track! Be the first one to rate it!')
+        elif len(votes) == 1:
+            embed.set_footer(text=f'A single rating of `{votes[0]}` by `{voters[0]}`')
+        else:
+            embed.set_footer(text=f'A total of `{len(votes)}` ratings, with an average of `{sum(votes)/len(votes):.2f}`')
+        
+        await interaction.followup.send(embed=embed)
+
 
 
 
