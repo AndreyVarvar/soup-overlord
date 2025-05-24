@@ -4,9 +4,18 @@ from utils import const
 from utils.add_music import add_music_to_database
 from utils import music_utils
 from ui.dropdown import RateMusicView
+import spotipy
+import random
 
 
-def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client):
+
+def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client: spotipy.Spotify):
+    init_context_menu_commands(command_tree, spotify_client)
+    init_slash_commands(command_tree, spotify_client)
+
+
+
+def init_context_menu_commands(command_tree: discord.app_commands.CommandTree, spotify_client):
     @command_tree.context_menu(
         name='Add music',
         guild=discord.Object(id=const.CONFIG["server"]["id"])
@@ -21,7 +30,7 @@ def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client
             await interaction.followup.send("This track was already shared before!")
         elif code == 0:
             await interaction.followup.send(response)
-            await message.add_reaction("⭐️")  # make a visual cue everything is okay
+            await message.add_reaction('\u2B50')  # make a visual cue everything is okay
 
         elif code == 2:
             await interaction.followup.send(response)
@@ -118,6 +127,68 @@ def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client
 
 
 
+def init_slash_commands(command_tree: discord.app_commands.CommandTree, spotify_client: spotipy.Spotify):
+    @command_tree.command(
+        name="music-rate-random",
+        description="Get a random track to rate",
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    async def music_rate_random(interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        data = music_utils.database_fetch_all_not_sent_by_user(interaction.user.name)
+
+        if len(data) == 0:
+            await interaction.followup.send("Sadly, there are no tracks for you to vote on")
+
+        # clean up the data a little
+        new_data = []
+        for i in range(len(data)):
+            item = data[i]
+            if item[6] is None or interaction.user.name not in item[6]:
+                new_data.append(item)
+        
+        data = new_data
+        
+        if len(data) == 0:
+            await interaction.followup.send("WOW, there isn't a single track that doesn't have your vote!")
+        else:
+            link = ''
+            for i in range(len(data)):  # list through all possible items and find the one, that works
+                random_item = random.choice(data)
+                result = spotify_client.search(q=f"artist:{random_item[1]} track:{random_item[0]}")
+
+                if len(result['tracks']['items']) == 0:  # spotify didn't find such a track - it probably got deleted
+                    del data[data.index(random_item)]
+
+                    if len(data) == 0:
+                        break
+                    else:
+                        continue
+
+                link = result['tracks']['items'][0]['external_urls']['spotify']
+                break
+
+            if len(link) == 0:
+                await interaction.followup.send('WOW, there isn\'t a single track that doesn\'t have your vote!')
+            else:
+                await interaction.followup.send(f'What would you rate `{random_item[0]}` by `{random_item[1]}`?\n{link}', view=RateMusicView(random_item[0], random_item[1], interaction.user.name))
+    
+
+
+
+    @command_tree.command(
+        name="test",
+        description="test",
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    @commands.is_owner()
+    async def test(interaction: discord.Interaction):
+        track = spotify_client.search(q="artist:405Okced track:Staff Roll")
+        print(track)
+        await interaction.response.send_message('test successful')
+    
+
+
 
 
     @command_tree.command(
@@ -134,6 +205,8 @@ def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client
         else:
             await interaction.channel.send(message)
     
+
+
     @command_tree.command(
         name="help",
         description="Get general information about the bot",
@@ -141,6 +214,8 @@ def init_commands(command_tree: discord.app_commands.CommandTree, spotify_client
     )
     async def help(interaction: discord.Interaction):
         await interaction.response.send_message("Just ask @andreyvarvar :P")
+
+
 
     @command_tree.command(
         name="ping",

@@ -6,8 +6,10 @@ from utils.log import log
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
 
+
 def spotify_link_in_message(message: discord.Message):
     return SPOTIFY_LINK_IDENTIFIER in message.content
+
 
 def get_all_links_in_message(message: discord.Message):
     links = []
@@ -69,7 +71,7 @@ def database_update_votes_and_voters(name, artist, new_vote, new_voter):
         if votes is None and voters is None:  # this track has no votes
             updated_votes = '' + new_vote
             updated_voters = '' + new_voter
-            log(f'`{new_voter}` is the first who voted for `{name}` by `{artist}` with a{"n" if new_vote=="8" else ""} `{new_vote}`')
+            log(f'`{new_voter}` is the first voter for `{name}` by `{artist}`, rating it with a{"n" if new_vote=="8" else ""} `{new_vote}`')
 
         elif new_voter not in voters:  # the track has votes, but this person has not voted yet
             updated_votes += ' ' + new_vote
@@ -93,3 +95,12 @@ def database_update_votes_and_voters(name, artist, new_vote, new_voter):
 
 def track_in_database(name, artist):
     return len(database_fetch_info(name, artist)) > 0
+
+
+def database_fetch_all_not_sent_by_user(username: str):
+    with sqlite3.connect("databases/spotify.sqlite") as connection:
+        cursor = connection.cursor()
+        select_query = "SELECT * FROM spotifies WHERE OriginalSender!=?;"
+            
+        data = cursor.execute(select_query, (username,)).fetchall()
+    return data

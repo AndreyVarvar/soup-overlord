@@ -6,6 +6,8 @@ from utils import const
 from src import events
 from src import commands
 
+const.RUNNING = True
+
 
 # setup
 intents = discord.Intents.all()
