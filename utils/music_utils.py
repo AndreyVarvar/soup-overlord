@@ -104,3 +104,31 @@ def database_fetch_all_not_sent_by_user(username: str):
             
         data = cursor.execute(select_query, (username,)).fetchall()
     return data
+
+
+
+def spotify_get_track_link(entry, spotify_client):
+    result = spotify_client.search(q=f"artist:{entry[1]} track:{entry[0]}")
+
+    if len(result['tracks']['items']) == 0:  # spotify didn't find such a track - it probably got deleted
+        return None
+
+    return result['tracks']['items'][0]['external_urls']['spotify']
+
+
+
+def database_fetch_all_alike(track_name: str, artist: str=None):
+    with sqlite3.connect("databases/spotify.sqlite") as connection:
+        cursor = connection.cursor()
+        select_query: str
+        args: tuple
+        if artist is None:
+            select_query = "SELECT * FROM spotifies WHERE UPPER(TrackName) LIKE UPPER(?)"
+            args = ("%"+track_name+"%",)
+        else:
+            select_query = "SELECT * FROM spotifies WHERE UPPER(TrackName) LIKE UPPER(?) AND UPPER(TrackAuthor) LIKE UPPER(?)"
+            args = ("%"+track_name+"%", "%"+artist+"%")
+            
+        data = cursor.execute(select_query, args).fetchall()
+    
+    return data

@@ -150,25 +150,25 @@ def init_slash_commands(command_tree: discord.app_commands.CommandTree, spotify_
         data = new_data
         
         if len(data) == 0:
-            await interaction.followup.send("WOW, there isn't a single track that doesn't have your vote!")
+            await interaction.followup.send("WOW, there isn\'t a single track that doesn\'t have your vote!")
         else:
-            link = ''
-            for i in range(len(data)):  # list through all possible items and find the one, that works
+            link = None
+            k = len(data)
+            for i in range(k):  # list through all possible items and find the one, that works
                 random_item = random.choice(data)
-                result = spotify_client.search(q=f"artist:{random_item[1]} track:{random_item[0]}")
+                link = music_utils.spotify_get_track_link(random_item, spotify_client)
 
-                if len(result['tracks']['items']) == 0:  # spotify didn't find such a track - it probably got deleted
+                if link is None:  # no such track exists on spotify end
                     del data[data.index(random_item)]
 
                     if len(data) == 0:
                         break
                     else:
                         continue
+                else:
+                    break
 
-                link = result['tracks']['items'][0]['external_urls']['spotify']
-                break
-
-            if len(link) == 0:
+            if link is None:
                 await interaction.followup.send('WOW, there isn\'t a single track that doesn\'t have your vote!')
             else:
                 await interaction.followup.send(f'What would you rate `{random_item[0]}` by `{random_item[1]}`?\n{link}', view=RateMusicView(random_item[0], random_item[1], interaction.user.name))
@@ -188,6 +188,47 @@ def init_slash_commands(command_tree: discord.app_commands.CommandTree, spotify_
         await interaction.response.send_message('test successful')
     
 
+
+
+    @command_tree.command(
+        name="rate-specific-track",
+        description="Rate a track you know the name of",
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    async def rate_specific(interaction: discord.Interaction, track_name: str, track_artist: str=None):
+        await interaction.response.defer(ephemeral=True)
+        
+        data = music_utils.database_fetch_all_alike(track_name, track_artist)
+        entries: list
+
+        if len(track_name) <= 3:  # in this case, we only search track that are 3 characters or less in length
+            # remove all tracks with 4 or more characters in their name
+            entries = []
+            for i in data:
+                if len(i[0]) <= 3:
+                    entries.append(i)
+            
+        else:
+            entries = data
+        
+        if len(entries) == 0:
+            await interaction.followup.send("No track with such a name was found")
+        elif len(entries) == 1:
+            entry = entries[0]
+            link = music_utils.spotify_get_track_link(entry, spotify_client)
+            if link is not None:
+                await interaction.followup.send(f'What would you rate `{entry[0]}` by `{entry[1]}`?\n{link}', view=RateMusicView(entry[0], entry[1], interaction.user.name))
+            else:
+                await interaction.followup.send("No track with such a name was found")
+        elif len(entries) < 4:
+            responses = []
+            for entry in entries:
+                responses.append(f"- Track `{entry[0]}` by `{entry[1]}` sent by `{entry[2]}`")
+            
+            response = f"There are a total of {len(entries)} entries that match your result:\n" + '\n'.join(responses) + "\nPlease use this command again, but with a specific artist specified."
+            await interaction.followup.send(response)
+        else:
+            await interaction.followup.send(f"Search query is too vague, there are multiple tracks with similar names ({len(entries)} entries found)")
 
 
 
