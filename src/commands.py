@@ -175,7 +175,6 @@ def init_slash_commands(command_tree: discord.app_commands.CommandTree, spotify_
     
 
 
-
     @command_tree.command(
         name="test",
         description="test",
@@ -187,6 +186,50 @@ def init_slash_commands(command_tree: discord.app_commands.CommandTree, spotify_
         print(track)
         await interaction.response.send_message('test successful')
     
+
+
+    @command_tree.command(
+        name="get-least-rated",
+        description="Rate a track you know the name of",
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    async def get_least_rated(interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        data = music_utils.database_fetch_all_not_sent_by_user(interaction.user.name)
+        least_rated = data[0]
+        least_votes = len(least_rated[5].split())
+        similarly_voted = [least_rated]
+
+        for item in data[1:]:
+            votes = len(item[5].split())
+            if votes < least_votes:
+                least_votes = votes
+                least_rated = item
+                similarly_voted.clear()
+                similarly_voted.append(least_rated)
+            elif votes == least_votes:
+                similarly_voted.append(item)
+
+        link = None
+        least_voted_track: tuple
+
+        while len(similarly_voted) > 0:
+            least_voted_track = random.choice(similarly_voted)
+            if interaction.user.name in least_voted_track[6]:
+                del similarly_voted[similarly_voted.index(least_voted_track)]
+                continue
+
+            link = music_utils.spotify_get_track_link(least_voted_track, spotify_client)
+            if link is not None:
+                break
+            else:
+                del similarly_voted[similarly_voted.index(least_voted_track)]
+
+        if link is not None:
+            await interaction.followup.send(f"Rate `{least_voted_track[0]}` by `{least_voted_track[1]}` with just `{least_votes}` votes?\n{link}", view=RateMusicView(least_voted_track[0], least_voted_track[1], interaction.user.name))
+        else:
+            await interaction.followup.send("WOW, there isn't a single track without your vote!")
 
 
 
