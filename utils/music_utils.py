@@ -50,6 +50,16 @@ def database_fetch_votes_and_voters(name, artist):
     return data[0][5], data[0][6]
 
 
+def database_fetch_all():
+    with sqlite3.connect("databases/spotify.sqlite") as connection:
+        cursor = connection.cursor()
+        select_query = "SELECT * FROM spotifies;"
+
+        data = cursor.execute(select_query).fetchall()
+    
+    return data
+
+
 def database_fetch_original_sender(name, artist):
     data = database_fetch_info(name, artist)
     
@@ -132,3 +142,21 @@ def database_fetch_all_alike(track_name: str, artist: str=None):
         data = cursor.execute(select_query, args).fetchall()
     
     return data
+
+
+def make_embed(name: str, artist: str, original_sender: str, votes, voters):
+    embed = discord.Embed(
+        color=discord.Color.dark_gold(),
+        title=f'Ratings for `{name}` by `{artist}`'
+    )
+
+    embed.set_author(name=original_sender)
+        
+    if len(votes) == 0:
+        embed.set_footer(text='There are no votes for this track! Be the first one to rate it!')
+    elif len(votes) == 1:
+        embed.set_footer(text=f'A single rating of `{votes[0]}`')
+    else:
+        embed.set_footer(text=f'A total of `{len(votes)}` ratings, with an average of `{sum(votes)/len(votes):.2f}`')
+    
+    return embed

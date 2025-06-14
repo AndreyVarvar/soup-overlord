@@ -45,9 +45,6 @@ def clean_up_database(spotify_client: spotipy.Spotify):
 
         return num_of_deleted_entries
 
-if not const.RUNNING:
-    spotify_client = init_sp(const.CONFIG["spotify"]["clientId"], const.CONFIG["spotify"]["clientSecret"])
-    num_of_deleted_entries = clean_up_database(spotify_client)
-    print(f"\ndeleted {num_of_deleted_entries} entries")
-else:
-    print("Can't cleanup database if the bot is up!")
+#spotify_client = init_sp(const.CONFIG["spotify"]["clientId"], const.CONFIG["spotify"]["clientSecret"])
+#num_of_deleted_entries = clean_up_database(spotify_client)
+print(f"THIS FUNCTIONALITY IS DEPRECCATED, DONT USE IT")

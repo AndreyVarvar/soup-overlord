@@ -109,19 +109,7 @@ def init_context_menu_commands(command_tree: discord.app_commands.CommandTree, s
 
         original_sender = music_utils.database_fetch_original_sender(name, artist)
 
-        embed = discord.Embed(
-            color=discord.Color.dark_gold(),
-            title=f'Ratings for `{name}` by `{artist}`'
-        )
-
-        embed.set_author(name=original_sender)
-        
-        if len(votes) == 0:
-            embed.set_footer(text='There are no votes for this track! Be the first one to rate it!')
-        elif len(votes) == 1:
-            embed.set_footer(text=f'A single rating of `{votes[0]}` by `{voters[0]}`')
-        else:
-            embed.set_footer(text=f'A total of `{len(votes)}` ratings, with an average of `{sum(votes)/len(votes):.2f}`')
+        embed = music_utils.make_embed(name, artist, original_sender, votes, voters)
         
         await interaction.followup.send(embed=embed)
 
@@ -259,10 +247,58 @@ def init_slash_commands(command_tree: discord.app_commands.CommandTree, spotify_
         elif len(entries) == 1:
             entry = entries[0]
             link = music_utils.spotify_get_track_link(entry, spotify_client)
+
+            user_vote = None
+            if interaction.user.name in entry[6]:
+                votes = entry[5].split()
+                voters = entry[6].split()
+                user_vote = votes[voters.index(interaction.user.name)]
+
             if link is not None:
-                await interaction.followup.send(f'What would you rate `{entry[0]}` by `{entry[1]}`?\n{link}', view=RateMusicView(entry[0], entry[1], interaction.user.name))
+                user_vote_text = ("\nYour previous vote was: " + str(user_vote)) if user_vote is not None else ("")
+                await interaction.followup.send(f'What would you rate `{entry[0]}` by `{entry[1]}`?{user_vote_text}\n{link}', view=RateMusicView(entry[0], entry[1], interaction.user.name))
             else:
                 await interaction.followup.send("No track with such a name was found")
+        elif len(entries) < 4:
+            responses = []
+            for entry in entries:
+                responses.append(f"- Track `{entry[0]}` by `{entry[1]}` sent by `{entry[2]}`")
+            
+            response = f"There are a total of {len(entries)} entries that match your result:\n" + '\n'.join(responses) + "\nPlease use this command again, but with a specific artist specified."
+            await interaction.followup.send(response)
+        else:
+            await interaction.followup.send(f"Search query is too vague, there are multiple tracks with similar names ({len(entries)} entries found)")
+
+
+    @command_tree.command(
+        name="get-rating-of-specific-track",
+        description="Get a rating of a track in the database",
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    async def get_rating_of_track(interaction: discord.Interaction, track_name: str, track_artist: str=None):
+        await interaction.response.defer(ephemeral=True)
+        
+        data = music_utils.database_fetch_all_alike(track_name, track_artist)
+        entries: list
+
+        if len(track_name) <= 3:  # in this case, we only search track that are 3 characters or less in length
+            # remove all tracks with 4 or more characters in their name
+            entries = []
+            for i in data:
+                if len(i[0]) <= 3:
+                    entries.append(i)
+            
+        else:
+            entries = data
+        
+        if len(entries) == 0:
+            await interaction.followup.send("No track with such a name was found")
+        elif len(entries) == 1:
+            entry = entries[0]
+            
+            embed = music_utils.make_embed(entry[0], entry[1], entry[2], entry[5].split(), entry[6].split())
+        
+            await interaction.followup.send(embed=embed)
         elif len(entries) < 4:
             responses = []
             for entry in entries:
@@ -289,6 +325,41 @@ def init_slash_commands(command_tree: discord.app_commands.CommandTree, spotify_
         else:
             await interaction.channel.send(message)
     
+
+    @command_tree.command(
+        name="get-total-unvoted",
+        description="Shows how many entries you have not voted on yet",
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    async def get_total_unvoted(interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        entries = music_utils.database_fetch_all_not_sent_by_user(interaction.user.name)
+        total_unvoted = 0
+        for entry in entries:
+            if entry[6] is None:
+                total_unvoted += 1
+                continue
+            if interaction.user.name not in entry[6]:
+                total_unvoted += 1
+        
+        if total_unvoted == 0:
+            await interaction.followup.send("You have voted on every single track.")
+        else:
+            await interaction.followup.send(f"You have {total_unvoted} total unvoted track{'' if total_unvoted == 1 else 's'}")
+
+
+    @command_tree.command(
+        name="fetch-database-volume",
+        description="Shows how many tracks are in the database",
+        guild=discord.Object(id=const.CONFIG["server"]["id"])
+    )
+    async def fetch_database_volume(interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        data = music_utils.database_fetch_all()
+        amount = len(data)
+
+        await interaction.followup.send(f"There are currently a total of {amount} entires in the database.")
 
 
     @command_tree.command(
