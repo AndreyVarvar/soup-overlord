@@ -5,6 +5,7 @@ from utils.log import log
 
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
+RANDOM_SI_THING = "?si="
 
 
 def spotify_link_in_message(message: discord.Message):
@@ -16,6 +17,8 @@ def get_all_links_in_message(message: discord.Message):
     words = (' '.join(message.content.split('\n'))).split()
     for word in words:
         if SPOTIFY_LINK_IDENTIFIER in word:
+            if RANDOM_SI_THING in word:
+                word = word.split(RANDOM_SI_THING)[0]
             links.append(word)
     
     return links
@@ -79,13 +82,13 @@ def database_update_votes_and_voters(name, artist, new_vote, new_voter):
 
 
         if votes is None and voters is None:  # this track has no votes
-            updated_votes = '' + new_vote
-            updated_voters = '' + new_voter
+            updated_votes = new_vote
+            updated_voters = new_voter
             log(f'`{new_voter}` is the first voter for `{name}` by `{artist}`, rating it with a{"n" if new_vote=="8" else ""} `{new_vote}`')
 
         elif new_voter not in voters:  # the track has votes, but this person has not voted yet
-            updated_votes += ' ' + new_vote
-            updated_voters += ' ' + new_voter
+            updated_votes = votes + ' ' + new_vote
+            updated_voters = voters + ' ' + new_voter
             log(f'`{new_voter}` voted `{new_vote}` for `{name}` by `{artist}`')
         
         elif new_voter in voters:  # a person already voted on this track, so we just change an existing vote
@@ -144,7 +147,19 @@ def database_fetch_all_alike(track_name: str, artist: str=None):
     return data
 
 
-def make_embed(name: str, artist: str, original_sender: str, votes, voters):
+def get_amount(arr: str | None):
+    if arr is not None:
+        return len(arr.split())
+    return 0
+
+
+def get_split(arr: str | None):
+    if arr is not None:
+        return arr.split()
+    return []
+
+
+def make_embed(name: str, artist: str, original_sender: str, votes: list[str], votes_count: int):
     embed = discord.Embed(
         color=discord.Color.dark_gold(),
         title=f'Ratings for `{name}` by `{artist}`'
@@ -152,11 +167,11 @@ def make_embed(name: str, artist: str, original_sender: str, votes, voters):
 
     embed.set_author(name=original_sender)
         
-    if len(votes) == 0:
+    if votes_count == 0:
         embed.set_footer(text='There are no votes for this track! Be the first one to rate it!')
-    elif len(votes) == 1:
+    elif votes_count == 1:
         embed.set_footer(text=f'A single rating of `{votes[0]}`')
     else:
-        embed.set_footer(text=f'A total of `{len(votes)}` ratings, with an average of `{sum(votes)/len(votes):.2f}`')
+        embed.set_footer(text=f'A total of `{votes_count}` ratings, with an average of `{sum(map(int, votes))/votes_count:.2f}`')
     
     return embed

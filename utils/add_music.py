@@ -5,6 +5,7 @@ import spotipy
 
 from .music_utils import spotify_link_in_message, get_all_links_in_message, get_track, get_track_info
 
+
 RESPONSES = [
     "No spotify link in message.",
     "No such track."
@@ -33,7 +34,6 @@ async def add_music_to_database(message: discord.Message, spotipy_client: spotip
         select_query = "SELECT * FROM spotifies WHERE TrackName=? AND TrackAuthor=?;"
 
         for link in links:
-
             track = get_track(link, spotipy_client)
 
             if track is None:
