@@ -8,11 +8,11 @@ SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
 RANDOM_SI_THING = "?si="
 
 
-def spotify_link_in_message(message: discord.Message):
+def spotify_link_in_message(message: discord.Message) -> bool:
     return SPOTIFY_LINK_IDENTIFIER in message.content
 
 
-def get_all_links_in_message(message: discord.Message):
+def get_all_links_in_message(message: discord.Message) -> list[str]:
     links = []
     words = (' '.join(message.content.split('\n'))).split()
     for word in words:
@@ -30,8 +30,9 @@ def get_track(link: str, spotipy_client: spotipy.Spotify):
     except:
         return None
     
+    
 
-def get_track_info(track):
+def get_track_info(track) -> tuple[str, str]:
     name = track['name']
     artist = track['artists'][0]['name']  # we take the name of the first artist that shows up
     return name, artist
@@ -110,12 +111,12 @@ def track_in_database(name, artist):
     return len(database_fetch_info(name, artist)) > 0
 
 
-def database_fetch_all_not_sent_by_user(username: str):
+def database_fetch_all_not_sent_by_user(id: str):
     with sqlite3.connect("databases/spotify.sqlite") as connection:
         cursor = connection.cursor()
         select_query = "SELECT * FROM spotifies WHERE OriginalSender!=?;"
             
-        data = cursor.execute(select_query, (username,)).fetchall()
+        data = cursor.execute(select_query, (id,)).fetchall()
     return data
 
 

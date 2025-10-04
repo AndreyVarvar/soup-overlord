@@ -5,12 +5,6 @@ import spotipy
 
 from .music_utils import spotify_link_in_message, get_all_links_in_message, get_track, get_track_info
 
-
-RESPONSES = [
-    "No spotify link in message.",
-    "No such track."
-]
-
 async def add_music_to_database(message: discord.Message, spotipy_client: spotipy.Spotify):
     """
     STEP 1: verify, that the message contains a spotify link
@@ -21,7 +15,7 @@ async def add_music_to_database(message: discord.Message, spotipy_client: spotip
 
     # step 1
     if not spotify_link_in_message(message):
-        return [1, RESPONSES[0]]  # no need to go further, this is a normal message (we hope)
+        return [1, "No spotify link in message."]  # no need to go further, this is a normal message (we hope)
     
     # step 2
     links = get_all_links_in_message(message)
@@ -51,11 +45,13 @@ async def add_music_to_database(message: discord.Message, spotipy_client: spotip
         # step 4
             cursor.execute(
                 "INSERT INTO spotifies (TrackName, TrackAuthor, OriginalSender, createdAt, updatedAt, Votes, Voters) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                (name, artist, message.author.name, str(message.created_at), str(message.created_at), None, None)
+                (name, artist, str(message.author.id), str(message.created_at), str(message.created_at), None, None)
             )
 
             log(f"Added `{name}` by `{artist}` to the music database.")
             response[0] = 0
             response[1] += f"Track `{name}` by `{artist}` was successfully added to the database." + "\n"
+        
+    response[1] += "\n-# If you believe there was an error, please try using 'Add music' command again. If the issue persists, please report this to the server owner."
 
     return response

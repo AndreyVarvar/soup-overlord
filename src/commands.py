@@ -9,6 +9,7 @@ from ui.dropdown import RateMusicView
 import spotipy
 import random
 
+
 def init_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
     init_context_menu_commands(bot, spotify_client)
     init_slash_commands(bot, spotify_client)
@@ -122,7 +123,7 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
     )
     async def music_rate_random(ctx: cmds.Context):
         await ctx.interaction.response.defer(ephemeral=True)
-        data = music_utils.database_fetch_all_not_sent_by_user(ctx.interaction.user.name)
+        data = music_utils.database_fetch_all_not_sent_by_user(ctx.interaction.user.id)
 
         if len(data) == 0:
             await ctx.interaction.followup.send("Sadly, there are no tracks for you to vote on.")
@@ -181,7 +182,7 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
     async def get_least_rated(ctx: cmds.Context):
         await ctx.interaction.response.defer(ephemeral=True)
 
-        data = music_utils.database_fetch_all_not_sent_by_user(ctx.interaction.user.name)
+        data = music_utils.database_fetch_all_not_sent_by_user(ctx.interaction.user.id)
         least_rated = data[0]
         least_votes = music_utils.get_amount(least_rated[5])
         similarly_voted = [least_rated]
@@ -330,7 +331,7 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
     )
     async def get_total_unvoted(ctx: cmds.Context):
         await ctx.interaction.response.defer(ephemeral=True)
-        entries = music_utils.database_fetch_all_not_sent_by_user(ctx.interaction.user.name)
+        entries = music_utils.database_fetch_all_not_sent_by_user(ctx.interaction.user.id)
         total_unvoted = 0
         for entry in entries:
             if entry[6] is None or ctx.interaction.user.name not in entry[6]:
