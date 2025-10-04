@@ -2,6 +2,7 @@ import discord
 import spotipy
 import sqlite3
 from utils.log import log
+import datetime
 
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
@@ -105,6 +106,8 @@ def database_update_votes_and_voters(name, artist, new_vote, new_voter):
 
         update_query = 'UPDATE spotifies SET Votes=?, Voters=? WHERE TrackName=? AND TrackAuthor=?'
         cursor.execute(update_query, (updated_votes, updated_voters, name, artist))
+    
+    backup()
 
 
 def track_in_database(name, artist):
@@ -176,3 +179,14 @@ def make_embed(name: str, artist: str, original_sender: str, votes: list[str], v
         embed.set_footer(text=f'A total of `{votes_count}` ratings, with an average of `{sum(map(int, votes))/votes_count:.2f}`')
     
     return embed
+
+
+def backup():
+    now = datetime.datetime.now()
+
+    src = sqlite3.connect('databases/spotify.sqlite')
+    dst = sqlite3.connect(f'backups/spotify{now.year}-{now.month}-{now.day}-{now.hour}-{now.minute}-{now.second}-{now.microsecond}.sqlite')
+    with dst:
+        src.backup(dst)
+    dst.close()
+    src.close()
