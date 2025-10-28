@@ -4,13 +4,13 @@ import sqlite3
 from utils.log import log
 import datetime
 
-
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
 RANDOM_SI_THING = "?si="
 
-
 def spotify_link_in_message(message: discord.Message) -> bool:
     return SPOTIFY_LINK_IDENTIFIER in message.content
+
+
 
 
 def get_all_links_in_message(message: discord.Message) -> list[str]:
@@ -106,8 +106,6 @@ def database_update_votes_and_voters(name, artist, new_vote, new_voter):
 
         update_query = 'UPDATE spotifies SET Votes=?, Voters=? WHERE TrackName=? AND TrackAuthor=?'
         cursor.execute(update_query, (updated_votes, updated_voters, name, artist))
-    
-    backup()
 
 
 def track_in_database(name, artist):
@@ -180,13 +178,3 @@ def make_embed(name: str, artist: str, original_sender: str, votes: list[str], v
     
     return embed
 
-
-def backup():
-    now = datetime.datetime.now()
-
-    src = sqlite3.connect('databases/spotify.sqlite')
-    dst = sqlite3.connect(f'backups/spotify{now.year}-{now.month}-{now.day}-{now.hour}-{now.minute}-{now.second}-{now.microsecond}.sqlite')
-    with dst:
-        src.backup(dst)
-    dst.close()
-    src.close()

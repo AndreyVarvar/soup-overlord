@@ -5,4 +5,4 @@ CONFIG: dict
 with open('config.json', 'r') as file:
     CONFIG = json.load(file)
 
-RUNNING = False
+spotify_database = "databases/spotify.sqlite"

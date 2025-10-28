@@ -2,16 +2,19 @@ import sqlite3
 from .log import log
 import discord
 import spotipy
+from utils import other_utils
+from discord.ext import commands as cmds
 
-from .music_utils import spotify_link_in_message, get_all_links_in_message, get_track, get_track_info, backup
+from .music_utils import spotify_link_in_message, get_all_links_in_message, get_track, get_track_info
 
-async def add_music_to_database(message: discord.Message, spotipy_client: spotipy.Spotify):
+async def add_music_to_database(bot: cmds.Bot, message: discord.Message, spotipy_client: spotipy.Spotify):
     """
     STEP 1: verify, that the message contains a spotify link
     STEP 2: verify, that the song/music exists on spotify
     STEP 3: check, if this track was shared before
     STEP 4: add the track to the spotify database
     """
+    other_utils.get_name(bot, str(message.author.id))  # we just use this function to store the name in case it changed
 
     # step 1
     if not spotify_link_in_message(message):
@@ -52,8 +55,6 @@ async def add_music_to_database(message: discord.Message, spotipy_client: spotip
             response[0] = 0
             response[1] += f"Track `{name}` by `{artist}` was successfully added to the database." + "\n"
         
-    response[1] += "\n-# If you believe there was an error, please try using 'Add music' command again. If the issue persists, please report this to the server owner."
-
-    backup()
+    response[1] += "\n-# If you believe there was an error, please report it to the server owner."
 
     return response

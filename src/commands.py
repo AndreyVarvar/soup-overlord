@@ -8,6 +8,8 @@ from utils import music_utils
 from ui.dropdown import RateMusicView
 import spotipy
 import random
+from utils import other_utils
+
 
 
 def init_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
@@ -18,7 +20,7 @@ def init_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
 def init_context_menu_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
     async def add_music(interaction: discord.Interaction, message: discord.Message):
         await interaction.response.defer(ephemeral=True)
-        code, response = await add_music_to_database(message, spotify_client)
+        code, response = await add_music_to_database(bot, message, spotify_client)
         
         if code == 1:
             await interaction.followup.send("This message does not contain a spotify link.")
@@ -159,7 +161,8 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
             if link is None:
                 await ctx.interaction.followup.send('WOW, there isn\'t a single track that doesn\'t have your vote!')
             else:
-                await ctx.interaction.followup.send(f'What would you rate `{random_item[0]}` by `{random_item[1]}` sent by `{random_item[2]}`?\n{link}', view=RateMusicView(random_item[0], random_item[1], ctx.interaction.user.name))
+                name = other_utils.get_name(bot, random_item[2])
+                await ctx.interaction.followup.send(f'What would you rate `{random_item[0]}` by `{random_item[1]}` sent by `{name}`?\n{link}', view=RateMusicView(random_item[0], random_item[1], ctx.interaction.user.name))
     
 
 
@@ -253,14 +256,16 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
                 user_vote = votes[voters.index(ctx.interaction.user.name)]
 
             if link is not None:
+                name = other_utils.get_name(bot, entry[2])
                 user_vote_text = ("\nYour previous vote was: " + str(user_vote)) if user_vote is not None else ("")
-                await ctx.interaction.followup.send(f'What would you rate `{entry[0]}` by `{entry[1]}`?{user_vote_text}\n{link}', view=RateMusicView(entry[0], entry[1], ctx.interaction.user.name))
+                await ctx.interaction.followup.send(f'What would you rate `{entry[0]}` by `{entry[1]}` sent by `{name}`?{user_vote_text}\n{link}', view=RateMusicView(entry[0], entry[1], ctx.interaction.user.name))
             else:
                 await ctx.interaction.followup.send("No track with such a name was found")
         elif len(entries) < 4:
             responses = []
             for entry in entries:
-                responses.append(f"- Track `{entry[0]}` by `{entry[1]}` sent by `{entry[2]}`")
+                name = other_utils.get_name(bot, entry[2])
+                responses.append(f"- Track `{entry[0]}` by `{entry[1]}` sent by `{name}`")
             
             response = f"There are a total of {len(entries)} entries that match your result:\n" + '\n'.join(responses) + "\nPlease use this command again, but with a specific artist specified."
             await ctx.interaction.followup.send(response)
@@ -300,7 +305,8 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
         elif len(entries) <= 6:
             responses = []
             for entry in entries:
-                responses.append(f"- Track `{entry[0]}` by `{entry[1]}` sent by `{entry[2]}`")
+                name = other_utils.get_name(bot, entry[2])
+                responses.append(f"- Track `{entry[0]}` by `{entry[1]}` sent by `{name}`")
             
             response = f"There are a total of {len(entries)} entries that match your result:\n" + '\n'.join(responses) + "\nPlease use this command again, but with a specific artist specified."
             await ctx.interaction.followup.send(response)
