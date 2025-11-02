@@ -175,6 +175,7 @@ cython_debug/
 
 # other
 config.json
+username_cache.json
 
 logs/
 databases/
