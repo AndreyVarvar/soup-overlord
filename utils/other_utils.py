@@ -6,7 +6,7 @@ def get_name(bot: cmds.Bot, user_id: str):
     """
     1) They are on the server and their name matched the one in cache
     2) They are on the server but they changed their name
-    3) They are not on the server and their old name is used
+    3) They are not on the server so their old name is used
     """
     with open("username_cache.json", "r") as file:
         cache = json.load(file)

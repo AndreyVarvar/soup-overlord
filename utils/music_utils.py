@@ -2,6 +2,7 @@ import discord
 import spotipy
 import sqlite3
 from utils.log import log
+from .const import CONFIG
 import datetime
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
@@ -11,6 +12,11 @@ def spotify_link_in_message(message: discord.Message) -> bool:
     return SPOTIFY_LINK_IDENTIFIER in message.content
 
 
+def add_to_public_playlist(spotipy_client: spotipy.Spotify, tracks: list[str]):
+    try:
+        spotipy_client.playlist_add_items(CONFIG["spotify"]["playlistId"], tracks, 0)
+    except Exception as e:
+        print("Error: ", e)
 
 
 def get_all_links_in_message(message: discord.Message) -> list[str]:

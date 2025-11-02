@@ -21,7 +21,7 @@ def init_events(bot: cmds.Bot, spotify_client):
         
         channel_id = message.channel.id
         if channel_id == const.CONFIG["server"]["musicChannel"]:
-            await process_message_for_music(message, spotify_client)
+            await process_message_for_music(bot, message, spotify_client)
 
 
     @bot.event

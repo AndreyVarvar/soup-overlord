@@ -173,7 +173,7 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
     )
     @commands.is_owner()
     async def test(ctx: cmds.Context):
-        await ctx.interaction.response.send_message('test successful')
+        await ctx.interaction.response.send_message('test successful', ephemeral=True)
     
 
 
@@ -235,10 +235,11 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
 
         if len(track_name) <= 3:  # in this case, we only search track that are 3 characters or less in length
             # remove all tracks with 4 or more characters in their name
-            entries = []
-            for i in data:
-                if len(i[0]) <= 3:
-                    entries.append(i)
+            # entries = []
+            # for i in data:
+            #     if len(i[0]) <= 3:
+            #         entries.append(i)
+            entries = data
             
         else:
             entries = data
@@ -261,7 +262,7 @@ def init_slash_commands(bot: cmds.Bot, spotify_client: spotipy.Spotify):
                 await ctx.interaction.followup.send(f'What would you rate `{entry[0]}` by `{entry[1]}` sent by `{name}`?{user_vote_text}\n{link}', view=RateMusicView(entry[0], entry[1], ctx.interaction.user.name))
             else:
                 await ctx.interaction.followup.send("No track with such a name was found")
-        elif len(entries) < 4:
+        elif len(entries) < 20:
             responses = []
             for entry in entries:
                 name = other_utils.get_name(bot, entry[2])

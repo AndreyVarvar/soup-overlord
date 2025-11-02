@@ -5,7 +5,7 @@ import spotipy
 from utils import other_utils
 from discord.ext import commands as cmds
 
-from .music_utils import spotify_link_in_message, get_all_links_in_message, get_track, get_track_info
+from .music_utils import spotify_link_in_message, get_all_links_in_message, get_track, get_track_info, add_to_public_playlist
 
 async def add_music_to_database(bot: cmds.Bot, message: discord.Message, spotipy_client: spotipy.Spotify):
     """
@@ -25,6 +25,7 @@ async def add_music_to_database(bot: cmds.Bot, message: discord.Message, spotipy
 
     # step 3
     response = [2, ""]  # prepare a response ahead of time
+    valid_links = []
 
     with sqlite3.connect("databases/spotify.sqlite") as connection:
         cursor = connection.cursor()
@@ -45,7 +46,7 @@ async def add_music_to_database(bot: cmds.Bot, message: discord.Message, spotipy
                 response[1] += f"Track `{name}` by `{artist}` was shared before!" + "\n"
                 continue # this track is already in the database
     
-        # step 4
+            # step 4
             cursor.execute(
                 "INSERT INTO spotifies (TrackName, TrackAuthor, OriginalSender, createdAt, updatedAt, Votes, Voters) VALUES (?, ?, ?, ?, ?, ?, ?)", 
                 (name, artist, str(message.author.id), str(message.created_at), str(message.created_at), None, None)
@@ -54,7 +55,11 @@ async def add_music_to_database(bot: cmds.Bot, message: discord.Message, spotipy
             log(f"Added `{name}` by `{artist}` to the music database.")
             response[0] = 0
             response[1] += f"Track `{name}` by `{artist}` was successfully added to the database." + "\n"
+            valid_links.insert(0, link)
+
         
     response[1] += "\n-# If you believe there was an error, please report it to the server owner."
+    add_to_public_playlist(spotipy_client, valid_links)
+    
 
     return response

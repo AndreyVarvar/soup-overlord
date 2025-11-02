@@ -1,8 +1,9 @@
 import discord
+from discord.ext import commands as cmds
 from .add_music import add_music_to_database
 
-async def process_message_for_music(message: discord.Message, spotipy_client):
-    code, response = await add_music_to_database(message, spotipy_client)
+async def process_message_for_music(bot: cmds.Bot, message: discord.Message, spotipy_client):
+    code, response = await add_music_to_database(bot, message, spotipy_client)
 
     if code == 1:
         pass
