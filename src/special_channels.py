@@ -8,7 +8,8 @@ async def process_message_for_music(bot: cmds.Bot, message: discord.Message, spo
     if code == 1:
         pass
     elif code == -1:
-        message.reply("This track was already shared before!")
+        await message.reply("This track was already shared before!")
+        await message.add_reaction('\u267B')  # react with a recycle icon
     elif code == 0:
         await message.add_reaction('\u2B50')  # make a visual cue everything is okay
 

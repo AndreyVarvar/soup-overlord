@@ -34,7 +34,8 @@ def get_all_links_in_message(message: discord.Message) -> list[str]:
 def get_track(link: str, spotipy_client: spotipy.Spotify):
     try:
         return spotipy_client.track(link)
-    except:
+    except Exception as e:
+        print(e)
         return None
     
     
