@@ -1,0 +1,21 @@
+======= CONTEXT MENUS ========
+- Add music
+  ADMIN ONLY: allows to add a new track to the database
+- Get rating
+  displays the rating of an entry
+- Rate
+  allows the user to rate the track
+
+========== COMMANDS ==========
+/echo <message> <#channel|None>
+/help <command>
+/music-total -> prints the volume of the database
+/music-get-least-rated -> prints the least rated track
+/music-get-rating-of <track_name> <artist|None> -> prints rating of a track
+/music-unrated-count -> prints the number of unrated tracks by the user
+/music-random-unrated -> prints a random unrated track
+/music-rate-specific <track_name> <artist|None> -> allows you to rate a specific track
+/ping
+/test -> random command 
+
+
