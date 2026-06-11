@@ -48,6 +48,9 @@ class Database:
                 (*[new_entry[col] for col in self.columns], *[old_entry[col] for col in self.columns if old_entry[col] is not None])
             )
 
+        index = self.entries.index(old_entry)
+        self.entries[index] = new_entry
+
 
 def spotify_link_in_message(message: discord.Message) -> bool:
     return SPOTIFY_LINK_IDENTIFIER in message.content

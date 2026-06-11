@@ -3,9 +3,6 @@ from discord.ext import commands as cmds
 
 
 def init_slash_commands(bot: cmds.Bot):
-    
-
-
     @bot.hybrid_command(
         name="test",
         description="test",
