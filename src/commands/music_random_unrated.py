@@ -1,13 +1,22 @@
 from discord.ext import commands as cmds
 from src.music_database import MusicDatabase
-from ui.dropdown import RateMusicView
+from src.ui.dropdown import RateMusicView
 
 import random
 
+from src.bot_core import SoupOverlordCore
+from src.log import log
 
-def register(bot: cmds.Bot, music_database: MusicDatabase):
+
+def register(soup_overlord: SoupOverlordCore):
+    name = "music-random-unrated"
+    log(f"Registering '{name}' command.")
+
+    bot: cmds.Bot = soup_overlord.bot
+    music_database: MusicDatabase = soup_overlord.music_database
+
     @bot.hybrid_command(
-        name="music-rate-random",
+        name=name,
         description="Get a random track to rate"
     )
     async def music_random_unrated(ctx: cmds.Context):
@@ -18,7 +27,7 @@ def register(bot: cmds.Bot, music_database: MusicDatabase):
 
         user_id = ctx.interaction.user.id
 
-        not_by_user = {entry for entry in music_database.entries if entry.original_sender != user_id}
+        not_by_user = [entry for entry in music_database.entries if entry.original_sender != user_id]
 
         if len(not_by_user) == 0:
             await ctx.interaction.followup.send("Sadly, there are no tracks for you to vote on.")
@@ -27,7 +36,7 @@ def register(bot: cmds.Bot, music_database: MusicDatabase):
         # clean up the data a little
         not_voted_by_user = []
         for entry in not_by_user:
-            if user_id not in entry.voters:
+            if user_id not in entry.votes:
                 not_voted_by_user.append(entry)
         
         if len(not_voted_by_user) == 0:
@@ -37,7 +46,7 @@ def register(bot: cmds.Bot, music_database: MusicDatabase):
 
         random_unvoted = random.choice(not_voted_by_user)
 
-        response = f'What would you rate `{random_unvoted.track_name}` by `{random_unvoted.track_author}` sent by `{random_unvoted.original_sender}`?'
+        response = f'What would you rate `{random_unvoted.track_name}` by `{random_unvoted.track_author}` sent by `{random_unvoted.original_sender}`?'  # TODO: make it convert original sender into the name of the person.
         response += f'\n{random_unvoted.link}'
         
         await ctx.interaction.followup.send(response, view=RateMusicView(entry=random_unvoted, voter=user_id))

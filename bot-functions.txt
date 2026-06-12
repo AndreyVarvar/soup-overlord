@@ -7,15 +7,24 @@
   allows the user to rate the track
 
 ========== COMMANDS ==========
-/echo <message> <#channel|None>
-/help <command>
-/music-total -> prints the volume of the database
-/music-get-least-rated -> prints the least rated track
-/music-get-rating-of <track_name> <artist|None> -> prints rating of a track
-/music-unrated-count -> prints the number of unrated tracks by the user
-/music-random-unrated -> prints a random unrated track
-/music-rate-specific <track_name> <artist|None> -> allows you to rate a specific track
-/ping
-/test -> random command 
+WORKS /ping
+WORKS /echo <message> <#channel|None>
+WORKS /help <command>
+WORKS /music-total -> prints the volume of the database
+WORKS /music-get-least-rated -> prints the least rated track
+WORKS /music-get-rating-of <track_name|None> <artist|None> <sent_by|None> -> prints rating of a track
+WORKS /music-unrated-count -> prints the number of unrated tracks by the user
+WORKS /music-random-unrated -> prints a random unrated track
+WORKS /music-rate-specific <track_name|None> <artist|None> <sent_by|None> -> allows you to rate a specific track
+WORKS /test -> test command 
+/music-filter <name|None> <artist|None> <sent_by|None>
+/music-list-top-rated <count|10>
+/music-list-my-top-rated <count|10>
+
+==== OTHER ====
+
+Make log.py log stuff into the discord
+
+fix the 'msuic-get-rating-of' urgin to vote on the track despite the user being unable to do so (they are the sendred ot he tracl)
 
 

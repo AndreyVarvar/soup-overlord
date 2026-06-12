@@ -4,7 +4,15 @@ import discord
 from src.const import CONFIG
 from src.log import log
 
-def register(bot: cmds.Bot):
+from src.bot_core import SoupOverlordCore
+from src.log import log
+
+
+def register(soup_overlord: SoupOverlordCore):
+    log("Registering 'on-ready' event.")
+    
+    bot = soup_overlord.bot
+
     @bot.event
     async def on_ready():
         bot.tree.clear_commands(guild=discord.Object(id=int(CONFIG['serverID'])))

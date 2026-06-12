@@ -1,5 +1,5 @@
-import src.bot as bot
+from src.bot import SoupOverlord
 
-soup_overlord = bot.init()
-bot.run(soup_overlord)
+soup_overlord = SoupOverlord()
+soup_overlord.run()
 

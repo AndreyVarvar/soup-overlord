@@ -1,23 +1,19 @@
-import discord
-from discord.ext import commands as cmds
-
-from src.const import CONFIG
+from src.bot_core import SoupOverlordCore
 
 import src.events as events
+import src.commands as commands
 
+from src.log import log
 
-def init():
-    intents = discord.Intents.all()
-    command_prefix = "S!"
+"""
+A place to bring everything together. It's where we assemble the pieces of the bot into one.
+"""
 
-    bot = cmds.Bot(intents=intents, command_prefix=command_prefix)
-    
-    events.init(bot)
-    
-    return bot
-        
+class SoupOverlord(SoupOverlordCore):
+    def __init__(self) -> None:
+        super().__init__()
 
-def run(bot: cmds.Bot):
-    token = CONFIG["token"]
-    bot.run(token=token)
+        events.init(self)
+        commands.init(self)
+
 
