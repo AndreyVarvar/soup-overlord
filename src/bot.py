@@ -3,8 +3,6 @@ from src.bot_core import SoupOverlordCore
 import src.events as events
 import src.commands as commands
 
-from src.log import log
-
 """
 A place to bring everything together. It's where we assemble the pieces of the bot into one.
 """

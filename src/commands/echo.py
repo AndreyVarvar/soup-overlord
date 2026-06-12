@@ -2,12 +2,11 @@ from discord.ext import commands as cmds
 import discord
 
 from src.bot_core import SoupOverlordCore
-from src.log import log
 
 
 def register(soup_overlord: SoupOverlordCore):
     name = "echo"
-    log(f"Registering '{name}' command.")
+    soup_overlord.log(f"Registering '{name}' command.")
     bot = soup_overlord.bot
 
     @bot.hybrid_command(

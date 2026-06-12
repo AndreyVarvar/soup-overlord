@@ -4,12 +4,11 @@ from src.music_database import Track, MusicDatabase
 import random
 
 from src.bot_core import SoupOverlordCore
-from src.log import log
 
 
 def register(soup_overlord: SoupOverlordCore):
     name = "music-get-least-rated"
-    log(f"Registering '{name}' command.")
+    soup_overlord.log(f"Registering '{name}' command.")
 
     bot: cmds.Bot = soup_overlord.bot
     music_database: MusicDatabase = soup_overlord.music_database

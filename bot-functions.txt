@@ -17,6 +17,7 @@ WORKS /music-unrated-count -> prints the number of unrated tracks by the user
 WORKS /music-random-unrated -> prints a random unrated track
 WORKS /music-rate-specific <track_name|None> <artist|None> <sent_by|None> -> allows you to rate a specific track
 WORKS /test -> test command 
+
 /music-filter <name|None> <artist|None> <sent_by|None>
 /music-list-top-rated <count|10>
 /music-list-my-top-rated <count|10>
@@ -25,6 +26,6 @@ WORKS /test -> test command
 
 Make log.py log stuff into the discord
 
-fix the 'msuic-get-rating-of' urgin to vote on the track despite the user being unable to do so (they are the sendred ot he tracl)
+fix the 'music-get-rating-of' urging to vote on the track despite the user being unable to do so (they are the sender of he track)
 
 

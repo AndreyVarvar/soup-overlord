@@ -3,8 +3,6 @@ from src.music_database import MusicDatabase
 
 from src.bot_core import SoupOverlordCore
 
-from src.log import log
-
 from . import \
     music_random_unrated, \
     test, \
@@ -19,7 +17,7 @@ from . import \
 
 
 def init(soup_overlord: SoupOverlordCore):
-    log("Registering commands.")
+    soup_overlord.log("Registering commands.")
 
     # general stuff
     echo.register(soup_overlord)

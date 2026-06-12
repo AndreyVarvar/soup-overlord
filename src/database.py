@@ -1,8 +1,5 @@
 import discord
 import sqlite3
-from src.log import log
-
-from pprint import pprint
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
 RANDOM_SI_THING = "?si="
@@ -165,7 +162,7 @@ def spotify_get_track_link(entry, spotify_client):
 
 
 
-def database_fetch_all_alike(track_name: str, artist: str=None):
+def database_fetch_all_alike(track_name: str, artist: str | None = None):
     with sqlite3.connect("databases/spotify.sqlite") as connection:
         cursor = connection.cursor()
         select_query: str

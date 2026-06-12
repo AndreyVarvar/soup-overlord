@@ -1,12 +1,11 @@
 from discord.ext import commands as cmds
 
 from src.bot_core import SoupOverlordCore
-from src.log import log
 
 
 def register(soup_overlord: SoupOverlordCore):
     name = "test"
-    log(f"Registering '{name}' command")
+    soup_overlord.log(f"Registering '{name}' command")
 
     bot: cmds.Bot = soup_overlord.bot
 
