@@ -19,3 +19,4 @@ def register(soup_overlord: SoupOverlordCore):
             return
 
         await ctx.interaction.response.send_message('test successful', ephemeral=True)
+        await soup_overlord.discord_log("The testing command was invoked and has completed successfully")

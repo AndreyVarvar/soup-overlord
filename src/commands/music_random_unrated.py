@@ -48,5 +48,5 @@ def register(soup_overlord: SoupOverlordCore):
         response = f'What would you rate `{random_unvoted.track_name}` by `{random_unvoted.track_author}` sent by `{random_unvoted.original_sender}`?'  # TODO: make it convert original sender into the name of the person.
         response += f'\n{random_unvoted.link}'
         
-        await ctx.interaction.followup.send(response, view=RateMusicView(entry=random_unvoted, voter=user_id))
+        await ctx.interaction.followup.send(response, view=RateMusicView(entry=random_unvoted, voter=user_id, soup_overlord=soup_overlord))
 

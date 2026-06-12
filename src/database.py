@@ -24,15 +24,24 @@ def snake_to_camel_case(s: str):
 
 class Database:
     def __init__(self, path: str) -> None:
-        with sqlite3.connect(path) as connection:
+        self.path = path
+        self.load_entries()
+
+    def load_entries(self):
+        with sqlite3.connect(self.path) as connection:
             cursor = connection.cursor()
             query = "SELECT * FROM spotifies"
             cursor.execute(query)
             self.columns = [camel_to_snake_case(desc[0]) for desc in cursor.description]
             
             self.entries: list = [dict(zip(self.columns, row)) for row in cursor.fetchall()]
-   
+            for i, entry in enumerate(self.entries):
+                entry["id"] = i 
+        
     def update_entry(self, old_entry, new_entry):
+        self.entries[old_entry["id"]] = new_entry
+
+    def update_database_entry(self, old_entry, new_entry):
         with sqlite3.connect("databases/spotify.sqlite") as connection:
             cursor = connection.cursor()
 
@@ -45,9 +54,7 @@ class Database:
                 (*[new_entry[col] for col in self.columns], *[old_entry[col] for col in self.columns if old_entry[col] is not None])
             )
 
-        index = self.entries.index(old_entry)
-        self.entries[index] = new_entry
-
+        self.update_entry(old_entry, new_entry)
 
 def spotify_link_in_message(message: discord.Message) -> bool:
     return SPOTIFY_LINK_IDENTIFIER in message.content

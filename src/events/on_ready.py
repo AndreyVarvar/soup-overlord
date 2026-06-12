@@ -19,3 +19,5 @@ def register(soup_overlord: SoupOverlordCore):
         
         soup_overlord.log("\n", timestamp=False)
         soup_overlord.log("Bot startup")
+
+        await soup_overlord.discord_log("Woke up!")

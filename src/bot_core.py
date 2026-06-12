@@ -20,10 +20,20 @@ class SoupOverlordCore:
         
     def run(self):
         self.bot.run(token=self.config["token"])
- 
+
+    async def discord_log(self, message):
+        channel = self.bot.get_channel(self.config["discordServer"]["logChannelID"])
+        if channel is None:
+            channel = await self.bot.fetch_channel(self.config["discordServer"]["logChannelID"])
+
+        if channel is None:
+            self.log(f"Couldn't find channel: {self.config["discordServer"]["logChannelID"]}")
+            return
+
+        await channel.send(message)
+
     def log(self, message, timestamp: bool = True, log_to_file: bool = False):
         current_time = datetime.now(timezone.utc).strftime("[UTC+0 %A %d, %B %Y, %H:%M:%S]: ")
-
         
         _log = ''
         if timestamp:
@@ -31,9 +41,9 @@ class SoupOverlordCore:
         _log += message
         
         if log_to_file:
-            CURRENT_LOG_FILE = "logs/" + datetime.now(timezone.utc).strftime("%d.%m.%y")
+            log_file = "logs/" + datetime.now(timezone.utc).strftime("%d.%m.%y")
 
-            with open(CURRENT_LOG_FILE, "a") as file:
+            with open(log_file, "a") as file:
                 file.write(_log + "\n")
         
         print(_log)

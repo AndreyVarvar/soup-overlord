@@ -53,4 +53,4 @@ def register(soup_overlord: SoupOverlordCore):
         response = f"Rate `{least_voted.track_name}` by `{least_voted.track_author}` sent by `{least_voted.original_sender}` with just `{smallest}` votes?"
         response += f"\n{least_voted.link}"
 
-        await ctx.interaction.followup.send(response, view=RateMusicView(entry=least_voted, voter=user_id))
+        await ctx.interaction.followup.send(response, view=RateMusicView(entry=least_voted, voter=user_id, soup_overlord=soup_overlord))

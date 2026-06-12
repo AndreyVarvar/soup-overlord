@@ -58,7 +58,7 @@ def register(soup_overlord: SoupOverlordCore):
                 response += f" Your previous vote was `{old_vote}`."
             response += f"\n{entry.link}"
 
-            await ctx.interaction.followup.send(response, view=RateMusicView(entry=entry, voter=user_id))
+            await ctx.interaction.followup.send(response, view=RateMusicView(entry=entry, voter=user_id, soup_overlord=soup_overlord))
             return
 
        

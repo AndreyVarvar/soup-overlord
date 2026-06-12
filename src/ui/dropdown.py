@@ -1,10 +1,12 @@
 import discord
 from src.music_database import MusicDatabase, Track
+from src.bot_core import SoupOverlordCore
 
 class RateMusicDropdown(discord.ui.Select):
-    def __init__(self, entry: Track, voter: int):
+    def __init__(self, entry: Track, voter: int, soup_overlord: SoupOverlordCore):
         self.entry = entry
         self.voter = voter
+        self.soup_overlord = soup_overlord
 
         options = [
             discord.SelectOption(
@@ -66,16 +68,23 @@ class RateMusicDropdown(discord.ui.Select):
         old_vote = self.entry.get_vote_by(self.voter)
         new_vote = int(self.values[0][:-1])  # strip the emoji away (sadge)
 
+        vote_number = len(self.entry.votes)
         self.entry.update_vote_by(self.voter, new_vote)
 
-        response = f'{new_vote} for `{self.entry.track_name}` by `{self.entry.track_author}`.'
+        response = f'You have rated `{self.entry.track_name}` by `{self.entry.track_author}` with a `{new_vote}`.'
         if old_vote is not None:
             response += f' Previous vote was `{old_vote}`'
 
         await interaction.followup.send(response, ephemeral=True)
+        
+        if old_vote is None:
+            await self.soup_overlord.discord_log(f"{interaction.user.name} has just voted on `{self.entry.track_name}` by `{self.entry.track_author}`. It now has `{vote_number+1}` votes.")
+            return
+
+        await self.soup_overlord.discord_log(f"{interaction.user.name} has just changed their vote on `{self.entry.track_name}` by `{self.entry.track_author}`.")
 
 
 class RateMusicView(discord.ui.View):
-    def __init__(self, entry: Track, voter: int):
+    def __init__(self, entry: Track, voter: int, soup_overlord: SoupOverlordCore):
         super().__init__()
-        self.add_item(RateMusicDropdown(entry, voter))
+        self.add_item(RateMusicDropdown(entry, voter, soup_overlord))
