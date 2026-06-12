@@ -1,7 +1,7 @@
 from discord.ext import commands as cmds
 import discord
 
-from src.ui.embed import make_music_rating_embed
+from src.ui.embed import RatingEmbed
 
 from src.music_database import MusicDatabase
 
@@ -51,9 +51,7 @@ def register(soup_overlord: SoupOverlordCore):
         if len(entries) == 1:
             entry = entries[0]
             
-            embed = make_music_rating_embed(entry, soup_overlord)
-    
-            await ctx.interaction.followup.send(embed=embed)
+            await ctx.interaction.followup.send(embed=RatingEmbed(entry, soup_overlord))
             return
 
         if len(entries) <= 6:

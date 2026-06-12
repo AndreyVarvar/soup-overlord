@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import discord
 from src.database import Database
 from datetime import datetime, timezone
 
@@ -37,7 +38,7 @@ class Track:
         
         self.votes = { key: value for key, value in zip(voters, votes)}
 
-        self.link: str = None  # FIXME: this requires a new field in the database. This is essential
+        self.link: str = entry["link"]  
 
         self.created_at: datetime = datetime.fromisoformat(entry["created_at"])
         self.updated_at: datetime = datetime.fromisoformat(entry["updated_at"])
@@ -61,6 +62,7 @@ class Track:
         entry["created_at"] = self.created_at.isoformat(sep=" ")
         entry["updated_at"] = self.updated_at.isoformat(sep=" ")
         entry["id"] = self.id
+        entry["link"] = self.link
 
         return entry
 
@@ -81,7 +83,7 @@ class Track:
 
 class MusicDatabase(Database):
     def __init__(self) -> None:
-        super().__init__("databases/spotify.sqlite")
+        super().__init__("spotifies", "databases/spotify.sqlite")
 
         for i, entry in enumerate(self.entries):
             self.entries[i] = Track(entry, self)
@@ -92,21 +94,45 @@ class MusicDatabase(Database):
     def update_database_entry(self, old_entry: Track, new_entry: Track):
         super().update_database_entry(old_entry.to_entry(), new_entry.to_entry())
 
+    def new_entry(self, track_name: str, track_author: str, link: str, original_sender: int):
+        now = datetime.now(timezone.utc).isoformat(sep=" ")
 
-# {
-# 'original_sender': 816298460432171033, 
-# 'track_author': 'Pascal Michael Stiefel', 
-# 'track_name': 'Train Rush', 
-# 'votes': None, 
-# 'voters': None, 
-# 'created_at': '2025-11-25 14:24:27.526000+00:00', 
-# 'updated_at': '2025-11-25 14:24:27.526000+00:00'
-# }
-#
-# Track(
-#   Train Rush, 
-#   Pascal Michael Stiefel, 
-#   816298460432171033, 
-#   2025-11-25 14:24:27.526000+00:00, 
-#   2026-06-12 11:51:20.259440+00:00, {705768532977385543: 9}), Track(Maybe a Time of Miracles (Sword & Sworcery)
-# , Marius Masalar, 816298460432171033, 2025-12-04 14:10:05.351000+00:00, 2025-12-04 14:10:05.351000+00:00, {}),
+        new_track = Track(
+            {
+                "original_sender": original_sender,
+                "track_author": track_author,
+                "track_name": track_name,
+                "votes": None,
+                "voters": None,
+                "id": len(self.entries),
+                "created_at": now,
+                "updated_at": now,
+                "link": link
+            },
+            self
+        )
+
+        return super().new_entry(new_track.to_entry())
+
+SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
+RANDOM_SI_THING = "?si="
+
+
+def get_link_identifier(link: str):
+    # https://open.spotify.com/track/1qOGac4gI48XN0JNl03Qt9?si=1905af66738d42bb -> 1qOGac4gI48XN0JNl03Qt9
+    return link.removeprefix(SPOTIFY_LINK_IDENTIFIER).removesuffix(RANDOM_SI_THING)
+
+def spotify_link_in_message(message: discord.Message) -> bool:
+    return SPOTIFY_LINK_IDENTIFIER in message.content
+
+def get_all_links_in_message(message: discord.Message) -> list[str]:
+    links = []
+    words = (' '.join(message.content.split('\n'))).split()
+    for word in words:
+        if SPOTIFY_LINK_IDENTIFIER in word:
+            if RANDOM_SI_THING in word:
+                word = word.split(RANDOM_SI_THING)[0]
+            links.append(word)
+    
+    return links
+

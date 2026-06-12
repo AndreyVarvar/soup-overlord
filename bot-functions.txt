@@ -29,3 +29,5 @@ Make log.py log stuff into the discord
 fix the 'music-get-rating-of' urging to vote on the track despite the user being unable to do so (they are the sender of he track)
 
 
+
+CHECK IF VOTING WORKS!!!
