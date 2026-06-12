@@ -51,7 +51,7 @@ def register(soup_overlord: SoupOverlordCore):
         if len(entries) == 1:
             entry = entries[0]
             
-            embed = make_music_rating_embed(entry)
+            embed = make_music_rating_embed(entry, soup_overlord)
     
             await ctx.interaction.followup.send(embed=embed)
             return
@@ -59,7 +59,7 @@ def register(soup_overlord: SoupOverlordCore):
         if len(entries) <= 6:
             responses = []
             for entry in entries:
-                responses.append(f"- Track `{entry.track_name}` by `{entry.track_author}` sent by `{entry.original_sender}`")
+                responses.append(f"- Track `{entry.track_name}` by `{entry.track_author}` sent by `{soup_overlord.get_cached_name(entry.original_sender)}`")
             
             response = f"There are a total of {len(entries)} entries that match your result:\n" + '\n'.join(responses) + "\nPlease use this command again, but with a more specific query."
             await ctx.interaction.followup.send(response)

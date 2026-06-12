@@ -53,7 +53,7 @@ def register(soup_overlord: SoupOverlordCore):
 
             old_vote = entry.votes[user_id] if user_id in entry.votes else None
 
-            response = f'What would you rate `{entry.track_name}` by `{entry.track_author}` sent by `{entry.original_sender}`?'  # TODO: turn original_sender into actual name
+            response = f'What would you rate `{entry.track_name}` by `{entry.track_author}` sent by `{soup_overlord.get_cached_name(entry.original_sender)}`?'  # TODO: turn original_sender into actual name
             if old_vote is not None:
                 response += f" Your previous vote was `{old_vote}`."
             response += f"\n{entry.link}"
@@ -66,7 +66,7 @@ def register(soup_overlord: SoupOverlordCore):
         if len(entries) <= to_show:  # will show `to_show` many tracks that matched the query
             responses = []
             for entry in entries:
-                responses.append(f"- Track `{entry.track_name}` by `{entry.track_author}` sent by `{entry.original_sender}`")  # TODO: fix the origial sender thing
+                responses.append(f"- Track `{entry.track_name}` by `{entry.track_author}` sent by `{soup_overlord.get_cached_name(entry.original_sender)}`")  # TODO: fix the origial sender thing
             
             response = f"There are a total of {len(entries)} entries that match your result:\n" + '\n'.join(responses) + "\nPlease use this command again, but with more specific details."
             await ctx.interaction.followup.send(response)

@@ -6,6 +6,8 @@ from src.music_database import MusicDatabase
 from src.const import CONFIG
 from datetime import datetime, timezone
 
+import json
+
 
 class SoupOverlordCore:
     def __init__(self) -> None:
@@ -47,4 +49,31 @@ class SoupOverlordCore:
                 file.write(_log + "\n")
         
         print(_log)
+    
+    def get_cached_name(self, user_id: int):
+        """
+        1) They are on the server and their name matched the one in cache
+        2) They are on the server but they changed their name
+        3) They are not on the server so their old name is used
+        """
 
+        with open("username_cache.json", "r") as file:
+            cache = json.load(file)
+
+        if str(user_id) in cache:
+            return cache[str(user_id)]
+
+        user = self.bot.get_user(user_id)
+        if user is None:
+            user = self.bot.fetch_user(user_id)
+
+        if user is None:
+            return "Unknown User"
+
+
+        cache[str(user_id)] = user.display_name  # update/set their nickname on the server
+
+        with open("username_cache.json", "w") as file:
+            json.dump(cache, file, indent=4)
+
+        return cache[str(user_id)]
