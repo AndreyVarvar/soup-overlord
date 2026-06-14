@@ -1,18 +1,14 @@
 from __future__ import annotations
 
 import discord
-from src.database import Database
+from src.database import Database, Entry
 from datetime import datetime, timezone
+
+from copy import deepcopy
 
 
 def update(func):
     def snapshot(self: Track, *args, **kwargs):
-        # old_entry = self.copy()
-        # result = func(self, *args, **kwargs)
-        # self.updated_at = datetime.now(timezone.utc)
-        # # update the music_database
-        # self.music_database.update_entry(old_entry, self)
-
         new_entry = self.copy()
         result = func(new_entry, *args, **kwargs)
         new_entry.updated_at = datetime.now(timezone.utc)
@@ -24,8 +20,10 @@ def update(func):
     return snapshot
 
 
-class Track:
+class Track(Entry):
     def __init__(self, entry: dict, music_database: MusicDatabase) -> None:
+        super().__init__(entry)
+
         self.id: int = entry["id"]
 
         self.original_sender: int = int(entry["original_sender"])
@@ -46,25 +44,7 @@ class Track:
         self.music_database: MusicDatabase = music_database
 
     def copy(self):
-        return Track(self.to_entry(), self.music_database)
-
-    def to_entry(self):
-        """
-        return a dictionary that representas an entry with values from self
-        """
-
-        entry = {}
-        entry["original_sender"] = self.original_sender
-        entry["track_author"] = self.track_author
-        entry["track_name"] = self.track_name
-        entry["votes"] = ' '.join(map(str, self.votes.values())) if len(self.votes) > 0 else None
-        entry["voters"] = ' '.join(map(str, self.votes.keys())) if len(self.votes) > 0 else None
-        entry["created_at"] = self.created_at.isoformat(sep=" ")
-        entry["updated_at"] = self.updated_at.isoformat(sep=" ")
-        entry["id"] = self.id
-        entry["link"] = self.link
-
-        return entry
+        return deepcopy(self)
 
     def get_vote_by(self, user_id: int):
         if user_id not in self.votes:
@@ -76,6 +56,28 @@ class Track:
     def update_vote_by(self, voter: int, new_vote: int):  # TODO: check if this works
         self.votes[voter] = new_vote
 
+    @update
+    def update_link(self, link: str):
+        self.link = link
+
+    def getattr(self, name):
+        if name == "original_sender":
+            return str(self.original_sender)
+        if name == "votes":
+            if len(self.votes) == 0:
+                return None
+            return ' '.join(map(str, self.votes.keys()))
+        if name == "voters":
+            if len(self.votes) == 0:
+                return None
+            return ' '.join(map(str, self.votes.values()))
+        if name == "created_at":
+            return self.created_at.isoformat(sep=" ")
+        if name == "updated_at":
+            return self.updated_at.isoformat(sep=" ")
+        
+        return super().getattr(name)
+
     def __repr__(self) -> str:
         return f"Track({self.track_name}, {self.track_author}, {self.original_sender}, {self.created_at}, {self.updated_at}, {self.votes})"
 
@@ -86,15 +88,15 @@ class MusicDatabase(Database):
         super().__init__("spotifies", "databases/spotify.sqlite")
 
         for i, entry in enumerate(self.entries):
-            self.entries[i] = Track(entry, self)
+            self.entries[i] = Track(entry.to_dict(), self)
 
     def update_entry(self, old_entry, new_entry):
-        self.entries[old_entry["id"]] = Track(new_entry, self)
+        self.entries[old_entry.id] = new_entry
 
     def update_database_entry(self, old_entry: Track, new_entry: Track):
-        super().update_database_entry(old_entry.to_entry(), new_entry.to_entry())
+        super().update_database_entry(old_entry, new_entry)
 
-    def new_entry(self, track_name: str, track_author: str, link: str, original_sender: int):
+    def new_entry(self, track_name: str, track_author: str, link: str, original_sender: int, created_at: datetime):
         now = datetime.now(timezone.utc).isoformat(sep=" ")
 
         new_track = Track(
@@ -105,14 +107,14 @@ class MusicDatabase(Database):
                 "votes": None,
                 "voters": None,
                 "id": len(self.entries),
-                "created_at": now,
+                "created_at": created_at.isoformat(sep=" "),
                 "updated_at": now,
                 "link": link
             },
             self
         )
 
-        return super().new_entry(new_track.to_entry())
+        super().new_entry(new_track)
 
 SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
 RANDOM_SI_THING = "?si="
