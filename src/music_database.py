@@ -4,6 +4,8 @@ import discord
 from src.database import Database, Entry
 from datetime import datetime, timezone
 
+from collections.abc import Callable
+
 from copy import deepcopy
 
 
@@ -99,6 +101,9 @@ class MusicDatabase(Database):
     def update_database_entry(self, old_entry: Track, new_entry: Track):
         super().update_database_entry(old_entry, new_entry)
 
+    def filter(self, filtering: Callable[[Track], bool]):
+        return super().filter(filtering)
+
     def new_entry(self, track_name: str, track_author: str, link: str, original_sender: int, created_at: datetime):
         now = datetime.now(timezone.utc).isoformat(sep=" ")
 
@@ -127,12 +132,25 @@ def get_link_identifier(link: str):
     # https://open.spotify.com/track/1qOGac4gI48XN0JNl03Qt9?si=1905af66738d42bb -> 1qOGac4gI48XN0JNl03Qt9
     return link.removeprefix(SPOTIFY_LINK_IDENTIFIER).removesuffix(RANDOM_SI_THING)
 
+
 def spotify_link_in_message(message: discord.Message) -> bool:
+    if message.message_snapshots:
+        for snapshot in message.message_snapshots:
+            if SPOTIFY_LINK_IDENTIFIER in snapshot.content:
+                return True
+
     return SPOTIFY_LINK_IDENTIFIER in message.content
+
 
 def get_all_links_in_message(message: discord.Message) -> list[str]:
     links = []
-    words = (' '.join(message.content.split('\n'))).split()
+    words = message.content.replace('\n', ' ').split()
+
+    if message.message_snapshots:
+        for snapshot in message.message_snapshots:
+            text = snapshot.content
+            words += text.replace('\n', ' ').split(' ')
+
     for word in words:
         if SPOTIFY_LINK_IDENTIFIER in word:
             if RANDOM_SI_THING in word:

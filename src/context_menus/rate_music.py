@@ -23,7 +23,7 @@ def register(soup_overlord: SoupOverlordCore):
         link = get_link_identifier(get_all_links_in_message(message)[0])  # process only the first link, duh
 
 
-        entries = [entry for entry in music_database.entries if entry.link == link]
+        entries = music_database.filter(lambda entry: entry.link == link)
 
         # check if the track exists in the database
         if len(entries) == 0:

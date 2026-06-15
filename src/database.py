@@ -1,5 +1,6 @@
 import discord
 import sqlite3
+from collections.abc import Callable
 
 
 def camel_to_snake_case(s: str):
@@ -77,5 +78,8 @@ class Database:
                 insertion_query,
                 [new_entry.getattr(col) for col in self.columns]
             )
+
+    def filter(self, filtering: Callable[[Entry], bool]):
+        return [entry for entry in self.entries if filtering(entry)]
 
 

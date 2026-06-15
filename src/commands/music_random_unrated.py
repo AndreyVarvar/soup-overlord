@@ -26,7 +26,7 @@ def register(soup_overlord: SoupOverlordCore):
 
         user_id = ctx.interaction.user.id
 
-        not_by_user = [entry for entry in music_database.entries if entry.original_sender != user_id]
+        not_by_user = music_database.filter(lambda entry: entry.original_sender != user_id)
 
         if len(not_by_user) == 0:
             await ctx.interaction.followup.send("Sadly, there are no tracks for you to vote on.")

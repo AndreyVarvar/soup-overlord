@@ -23,13 +23,6 @@ WORKS /test -> test command
 /music-list-my-top-rated <count|10>
 
 ==== OTHER ====
-
-Make log.py log stuff into the discord
-
 fix the 'music-get-rating-of' urging to vote on the track despite the user being unable to do so (they are the sender of he track)
 
-
-
 CHECK IF VOTING WORKS!!!
-
-make the bot warn a user if they sent a message with more than 1 spotify link

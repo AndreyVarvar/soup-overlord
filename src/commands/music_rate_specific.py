@@ -33,16 +33,12 @@ def register(soup_overlord: SoupOverlordCore):
 
         user_id = ctx.interaction.user.id
 
-        entries = [entry for entry in music_database.entries if entry.original_sender != user_id]
-
-        if track_name is not None:
-            entries = [entry for entry in entries if track_name.upper() in entry.track_name.upper()]
-
-        if track_author is not None:
-            entries = [entry for entry in entries if track_author.upper() in entry.track_author.upper()]
-
-        if sent_by is not None:
-            entries = [entry for entry in entries if sent_by.id == entry.original_sender]
+        entries = music_database.filter(
+            lambda entry: \
+                (track_name is None or track_name.upper() in entry.track_name.upper()) and \
+                (track_author is None or track_author.upper() in entry.track_author.upper()) and \
+                (sent_by is None or sent_by.id == entry.original_sender)
+        ) 
         
         if len(entries) == 0:
             await ctx.interaction.followup.send("No tracks with such criterias were found")

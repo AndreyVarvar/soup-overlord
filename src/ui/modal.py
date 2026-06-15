@@ -19,7 +19,7 @@ class TrackInfoModal(discord.ui.Modal):
             style=discord.TextStyle.short,
             placeholder="e.g. Never Gonna Give You Up",
             required=True,
-            max_length=100
+            max_length=200
         )
 
         self.track_author = discord.ui.TextInput(
@@ -27,7 +27,7 @@ class TrackInfoModal(discord.ui.Modal):
             style=discord.TextStyle.short,
             placeholder="e.g. Rick Astley",
             required=True,
-            max_length=100
+            max_length=200
         )
 
         self.add_item(self.track_name)
@@ -39,7 +39,7 @@ class TrackInfoModal(discord.ui.Modal):
         track_name = self.track_name.value
         track_author = self.track_author.value
 
-        entries = [entry for entry in self.soup_overlord.music_database.entries if entry.link == self.link]
+        entries = self.soup_overlord.music_database.filter(lambda entry: entry.link == self.link)
         if len(entries) > 0:
             example = entries[0]
             
@@ -54,9 +54,7 @@ class TrackInfoModal(discord.ui.Modal):
             
             return
 
-        entries = self.soup_overlord.music_database.entries.copy()
-        entries = [entry for entry in entries if entry.track_name == track_name]
-        entries = [entry for entry in entries if entry.track_author == track_author]
+        entries = self.soup_overlord.music_database.filter(lambda entry: entry.track_name == track_name and entry.track_author == track_author)
         if len(entries) > 0:  # ideally there should be only 1 such entry
             example: Track = entries[0]
 

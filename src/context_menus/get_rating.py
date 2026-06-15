@@ -21,7 +21,7 @@ def register(soup_overlord: SoupOverlordCore):
         
         link = get_link_identifier(get_all_links_in_message(message)[0])
 
-        entries = [entry for entry in music_database.entries if entry.link == link]
+        entries = music_database.filter(lambda entry: entry.link == link)
 
         if len(entries) == 0:
             await interaction.followup.send("Add this track to the database first using 'Add music' before getting a rating")

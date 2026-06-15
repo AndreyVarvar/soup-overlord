@@ -21,15 +21,11 @@ def register(soup_overlord: SoupOverlordCore):
             return
 
         await ctx.interaction.response.defer(ephemeral=True)
-        entries = music_database.entries.copy()
-        total_unvoted = 0
-        
+       
         user_id = ctx.interaction.user.id
-
-        for entry in entries:
-            if user_id not in entry.votes and user_id != entry.original_sender:
-                total_unvoted += 1
         
+        total_unvoted = len(music_database.filter(lambda entry: user_id not in entry.votes and entry.original_sender != user_id))
+
         if total_unvoted == 0:
             await ctx.interaction.followup.send("WOW, there isn't a single track you haven't voted on!")
             return
