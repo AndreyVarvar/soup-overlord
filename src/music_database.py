@@ -44,7 +44,10 @@ class Track(Entry):
         self.music_database: MusicDatabase = music_database
 
     def copy(self):
-        return deepcopy(self)
+        return Track(
+            deepcopy(self._original),
+            self.music_database
+        )
 
     def get_vote_by(self, user_id: int):
         if user_id not in self.votes:
@@ -63,11 +66,11 @@ class Track(Entry):
     def getattr(self, name):
         if name == "original_sender":
             return str(self.original_sender)
-        if name == "votes":
+        if name == "voters":
             if len(self.votes) == 0:
                 return None
             return ' '.join(map(str, self.votes.keys()))
-        if name == "voters":
+        if name == "votes":
             if len(self.votes) == 0:
                 return None
             return ' '.join(map(str, self.votes.values()))
@@ -79,7 +82,7 @@ class Track(Entry):
         return super().getattr(name)
 
     def __repr__(self) -> str:
-        return f"Track({self.track_name}, {self.track_author}, {self.original_sender}, {self.created_at}, {self.updated_at}, {self.votes})"
+        return f"Track({self.track_name}, {self.track_author}, {self.original_sender}, {self.created_at}, {self.updated_at}, {self.votes}, {self.link}, {self.id})"
 
 
 
@@ -91,7 +94,7 @@ class MusicDatabase(Database):
             self.entries[i] = Track(entry.to_dict(), self)
 
     def update_entry(self, old_entry, new_entry):
-        self.entries[old_entry.id] = new_entry
+        self.entries[old_entry.id-1] = new_entry  # NOTE: the -1 is important, because in sqlite table ordering starts from 1, not 0
 
     def update_database_entry(self, old_entry: Track, new_entry: Track):
         super().update_database_entry(old_entry, new_entry)
@@ -106,7 +109,7 @@ class MusicDatabase(Database):
                 "track_name": track_name,
                 "votes": None,
                 "voters": None,
-                "id": len(self.entries),
+                "id": len(self.entries)+1,
                 "created_at": created_at.isoformat(sep=" "),
                 "updated_at": now,
                 "link": link

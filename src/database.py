@@ -56,14 +56,15 @@ class Database:
             cursor = connection.cursor()
 
             update_query = f"UPDATE {self.name} SET " + ", ".join([f'{col}=?' for col in self.camel_columns]) + " WHERE " + " AND ".join([(f'{col}=?' if old_entry.getattr(self.columns[i]) else f'{col} IS NULL') for i, col in enumerate(self.camel_columns)])
+            update_fields = (*[new_entry.getattr(col) for col in self.columns], *[old_entry.getattr(col) for col in self.columns if old_entry.getattr(col)])
 
             cursor.execute(
                 update_query, 
-                (*[new_entry.getattr(col) for col in self.columns], *[old_entry.getattr(col) for col in self.columns if old_entry.getattr(col) is not None])
+                update_fields
             )
 
         self.update_entry(old_entry, new_entry)
-    
+
     def new_entry(self, new_entry: Entry):
         self.entries.append(new_entry)
 
@@ -76,6 +77,5 @@ class Database:
                 insertion_query,
                 [new_entry.getattr(col) for col in self.columns]
             )
-
 
 

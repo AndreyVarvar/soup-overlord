@@ -31,3 +31,5 @@ fix the 'music-get-rating-of' urging to vote on the track despite the user being
 
 
 CHECK IF VOTING WORKS!!!
+
+make the bot warn a user if they sent a message with more than 1 spotify link
