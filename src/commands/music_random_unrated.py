@@ -1,5 +1,5 @@
 from discord.ext import commands as cmds
-from src.music_database import MusicDatabase
+from src.music_database import MusicDatabase, get_link_from_identifier
 from src.ui.dropdown import RateMusicView
 
 import random
@@ -11,7 +11,7 @@ def register(soup_overlord: SoupOverlordCore):
     name = "music-random-unrated"
     soup_overlord.log(f"Registering '{name}' command.")
 
-    bot: cmds.Bot = soup_overlord.bot
+    bot: cmds.Bot = soup_overlord
     music_database: MusicDatabase = soup_overlord.music_database
 
     @bot.hybrid_command(
@@ -46,7 +46,7 @@ def register(soup_overlord: SoupOverlordCore):
         random_unvoted = random.choice(not_voted_by_user)
 
         response = f'What would you rate `{random_unvoted.track_name}` by `{random_unvoted.track_author}` sent by `{soup_overlord.get_cached_name(random_unvoted.original_sender)}`?'  # TODO: make it convert original sender into the name of the person.
-        response += f'\n{random_unvoted.link}'
+        response += f'\n{get_link_from_identifier(random_unvoted.link)}'
         
         await ctx.interaction.followup.send(response, view=RateMusicView(entry=random_unvoted, voter=user_id, soup_overlord=soup_overlord))
 

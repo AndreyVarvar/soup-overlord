@@ -1,6 +1,6 @@
 from discord.ext import commands as cmds
 from src.ui.dropdown import RateMusicView
-from src.music_database import Track, MusicDatabase
+from src.music_database import Track, MusicDatabase, get_link_from_identifier
 import random
 
 from src.bot_core import SoupOverlordCore
@@ -10,7 +10,7 @@ def register(soup_overlord: SoupOverlordCore):
     name = "music-get-least-rated"
     soup_overlord.log(f"Registering '{name}' command.")
 
-    bot: cmds.Bot = soup_overlord.bot
+    bot: cmds.Bot = soup_overlord
     music_database: MusicDatabase = soup_overlord.music_database
 
     @bot.hybrid_command(
@@ -51,6 +51,6 @@ def register(soup_overlord: SoupOverlordCore):
         least_voted: Track = random.choice(entries_by_votes[smallest])
 
         response = f"Rate `{least_voted.track_name}` by `{least_voted.track_author}` sent by `{soup_overlord.get_cached_name(least_voted.original_sender)}` with just `{smallest}` votes?"
-        response += f"\n{least_voted.link}"
+        response += f"\n{get_link_from_identifier(least_voted.link)}"
 
         await ctx.interaction.followup.send(response, view=RateMusicView(entry=least_voted, voter=user_id, soup_overlord=soup_overlord))

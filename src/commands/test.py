@@ -7,7 +7,7 @@ def register(soup_overlord: SoupOverlordCore):
     name = "test"
     soup_overlord.log(f"Registering '{name}' command")
 
-    bot: cmds.Bot = soup_overlord.bot
+    bot: cmds.Bot = soup_overlord
 
     @bot.hybrid_command(
         name=name,

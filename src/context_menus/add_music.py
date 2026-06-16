@@ -8,7 +8,7 @@ from src.bot_core import SoupOverlordCore
 
 
 def register(soup_overlord: SoupOverlordCore):
-    bot = soup_overlord.bot
+    bot = soup_overlord
     music_database = soup_overlord.music_database
 
     async def add_music(interaction: discord.Interaction, message: discord.Message):

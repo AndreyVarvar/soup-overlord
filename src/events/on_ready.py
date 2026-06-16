@@ -6,7 +6,7 @@ from src.bot_core import SoupOverlordCore
 def register(soup_overlord: SoupOverlordCore):
     soup_overlord.log("Registering 'on-ready' event.")
     
-    bot = soup_overlord.bot
+    bot = soup_overlord
 
     @bot.event
     async def on_ready():

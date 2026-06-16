@@ -1,7 +1,7 @@
 from discord.ext import commands as cmds
 import discord
 
-from src.ui.embed import RatingEmbed
+from src.ui.embed import InfoEmbed
 
 from src.music_database import MusicDatabase
 
@@ -9,16 +9,16 @@ from src.bot_core import SoupOverlordCore
 
 
 def register(soup_overlord: SoupOverlordCore):
-    name = "music-get-rating-of"
+    name = "music-get-info-of"
     soup_overlord.log(f"Registering '{name}' command")
-    bot: cmds.Bot = soup_overlord.bot
+    bot: cmds.Bot = soup_overlord
     music_database: MusicDatabase = soup_overlord.music_database
 
     @bot.hybrid_command(
         name=name,
-        description="Get a rating of a specific track"
+        description="Get a info of a specific track"
     )
-    async def music_get_rating_of(
+    async def music_get_info_of(
         ctx: cmds.Context, 
         track_name: str | None = None, 
         track_author: str | None = None,
@@ -47,7 +47,9 @@ def register(soup_overlord: SoupOverlordCore):
         if len(entries) == 1:
             entry = entries[0]
             
-            await ctx.interaction.followup.send(embed=RatingEmbed(entry, soup_overlord))
+            sender = ctx.interaction.user
+
+            await ctx.interaction.followup.send(embed=await InfoEmbed.build(soup_overlord, entry, sender))
             return
 
         if len(entries) <= 6:

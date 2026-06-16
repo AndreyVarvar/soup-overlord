@@ -9,24 +9,26 @@ from datetime import datetime, timezone
 import json
 
 
-class SoupOverlordCore:
+class SoupOverlordCore(cmds.Bot):
     def __init__(self) -> None:
-        self.intents = discord.Intents.all()
         self.command_prefix = "S!"
 
         self.config = CONFIG
-
-        self.bot = cmds.Bot(intents=self.intents, command_prefix=self.command_prefix, help_command=None)
         
+        super().__init__(
+            intents=discord.Intents.all(),
+            command_prefix=self.command_prefix
+        )
+        self.remove_command('help')
         self.music_database = MusicDatabase()
         
     def run(self):
-        self.bot.run(token=self.config["token"])
+        super().run(token=self.config["token"])
 
     async def discord_log(self, message):
-        channel = self.bot.get_channel(self.config["discordServer"]["logChannelID"])
+        channel = self.get_channel(self.config["discordServer"]["logChannelID"])
         if channel is None:
-            channel = await self.bot.fetch_channel(self.config["discordServer"]["logChannelID"])
+            channel = await self.fetch_channel(self.config["discordServer"]["logChannelID"])
 
         if channel is None:
             self.log(f"Couldn't find channel: {self.config["discordServer"]["logChannelID"]}")
@@ -63,9 +65,9 @@ class SoupOverlordCore:
         if str(user_id) in cache:
             return cache[str(user_id)]
 
-        user = self.bot.get_user(user_id)
+        user = self.get_user(user_id)
         if user is None:
-            user = self.bot.fetch_user(user_id)
+            user = self.fetch_user(user_id)
 
         if user is None:
             return "Unknown User"

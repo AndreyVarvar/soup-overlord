@@ -9,7 +9,7 @@ def register(soup_overlord: SoupOverlordCore):
     name = "music-unrated-count"
     soup_overlord.log(f"Registering '{name}' command.")
 
-    bot: cmds.Bot = soup_overlord.bot
+    bot: cmds.Bot = soup_overlord
     music_database: MusicDatabase = soup_overlord.music_database
 
     @bot.hybrid_command(

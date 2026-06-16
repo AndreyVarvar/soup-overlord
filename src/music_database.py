@@ -128,6 +128,10 @@ SPOTIFY_LINK_IDENTIFIER = "https://open.spotify.com/track/"
 RANDOM_SI_THING = "?si="
 
 
+def get_link_from_identifier(id: str):
+    return SPOTIFY_LINK_IDENTIFIER + id if (id is not None) else None
+
+
 def get_link_identifier(link: str):
     # https://open.spotify.com/track/1qOGac4gI48XN0JNl03Qt9?si=1905af66738d42bb -> 1qOGac4gI48XN0JNl03Qt9
     return link.removeprefix(SPOTIFY_LINK_IDENTIFIER).removesuffix(RANDOM_SI_THING)

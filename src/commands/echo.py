@@ -7,7 +7,7 @@ from src.bot_core import SoupOverlordCore
 def register(soup_overlord: SoupOverlordCore):
     name = "echo"
     soup_overlord.log(f"Registering '{name}' command.")
-    bot = soup_overlord.bot
+    bot = soup_overlord
 
     @bot.hybrid_command(
         name=name,

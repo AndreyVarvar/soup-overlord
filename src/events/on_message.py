@@ -1,6 +1,6 @@
 import discord
 from src.bot_core import SoupOverlordCore
-from src.music_database import MusicDatabase, Track, get_all_links_in_message
+from src.music_database import MusicDatabase, Track, get_all_links_in_message, get_link_identifier
 
 
 def register(soup_overlord: SoupOverlordCore):
@@ -8,12 +8,12 @@ def register(soup_overlord: SoupOverlordCore):
 
     music_database: MusicDatabase = soup_overlord.music_database
 
-    @soup_overlord.bot.event
+    @soup_overlord.event
     async def on_message(message: discord.Message):
         if message.author.bot:
             return  # don't allow bots to trigger the event
 
-        if message.channel == soup_overlord.config["discordServer"]["musicChannelID"]:
+        if message.channel.id == soup_overlord.config["discordServer"]["musicChannelID"]:
             links = get_all_links_in_message(message)
 
             if len(links) >= 2:
@@ -21,7 +21,7 @@ def register(soup_overlord: SoupOverlordCore):
                 return
             
             if len(links) == 1:
-                link = links[0]
+                link = get_link_identifier(links[0])
                 entries = music_database.filter(lambda entry: entry.link == link)
 
                 if len(entries) > 1:  # catch when there are more than 1 entry with the same link

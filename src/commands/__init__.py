@@ -1,6 +1,3 @@
-from discord.ext import commands as cmds
-from src.music_database import MusicDatabase
-
 from src.bot_core import SoupOverlordCore
 
 from . import \
@@ -11,9 +8,12 @@ from . import \
     echo, \
     help, \
     music_unrated_count, \
-    music_get_rating_of, \
+    music_get_info_of, \
     music_total, \
-    ping
+    ping, \
+    music_filter, \
+    music_list_top_rated, \
+    music_list_my_top_rated
 
 
 def init(soup_overlord: SoupOverlordCore):
@@ -30,7 +30,10 @@ def init(soup_overlord: SoupOverlordCore):
     music_get_least_rated.register(soup_overlord)
     music_rate_specific.register(soup_overlord)
     music_unrated_count.register(soup_overlord)
-    music_get_rating_of.register(soup_overlord)
+    music_get_info_of.register(soup_overlord)
     music_total.register(soup_overlord)
+    music_filter.register(soup_overlord)
+    music_list_top_rated.register(soup_overlord)
+    music_list_my_top_rated.register(soup_overlord)
 
 

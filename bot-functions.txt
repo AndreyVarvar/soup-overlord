@@ -18,11 +18,9 @@ WORKS /music-random-unrated -> prints a random unrated track
 WORKS /music-rate-specific <track_name|None> <artist|None> <sent_by|None> -> allows you to rate a specific track
 WORKS /test -> test command 
 
-/music-filter <name|None> <artist|None> <sent_by|None>
-/music-list-top-rated <count|10>
-/music-list-my-top-rated <count|10>
+WORKS /music-filter <name|None> <artist|None> <sent_by|None>
+WORKS /music-list-top-rated <count|10>
+WORKS /music-list-my-top-rated <count|10>
 
 ==== OTHER ====
 fix the 'music-get-rating-of' urging to vote on the track despite the user being unable to do so (they are the sender of he track)
-
-CHECK IF VOTING WORKS!!!

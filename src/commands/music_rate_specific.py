@@ -1,7 +1,7 @@
 from discord.ext import commands as cmds
 import discord
 from src.ui.dropdown import RateMusicView
-from src.music_database import MusicDatabase
+from src.music_database import MusicDatabase, get_link_from_identifier
 
 from src.bot_core import SoupOverlordCore
 
@@ -9,7 +9,7 @@ from src.bot_core import SoupOverlordCore
 def register(soup_overlord: SoupOverlordCore):
     name = "music-rate-specific"
     soup_overlord.log(f"Registering '{name}' command.")
-    bot: cmds.Bot = soup_overlord.bot
+    bot: cmds.Bot = soup_overlord
     music_database: MusicDatabase = soup_overlord.music_database
 
     @bot.hybrid_command(
@@ -52,7 +52,7 @@ def register(soup_overlord: SoupOverlordCore):
             response = f'What would you rate `{entry.track_name}` by `{entry.track_author}` sent by `{soup_overlord.get_cached_name(entry.original_sender)}`?'  # TODO: turn original_sender into actual name
             if old_vote is not None:
                 response += f" Your previous vote was `{old_vote}`."
-            response += f"\n{entry.link}"
+            response += f"\n{get_link_from_identifier(entry.link)}"
 
             await ctx.interaction.followup.send(response, view=RateMusicView(entry=entry, voter=user_id, soup_overlord=soup_overlord))
             return

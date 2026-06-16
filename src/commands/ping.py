@@ -7,7 +7,7 @@ def register(soup_overlord: SoupOverlordCore):
     name = "ping"
     soup_overlord.log(f"Registering '{name}' command")
 
-    bot: cmds.Bot = soup_overlord.bot
+    bot: cmds.Bot = soup_overlord
 
     @bot.hybrid_command(
         name=name,
@@ -16,5 +16,6 @@ def register(soup_overlord: SoupOverlordCore):
     async def ping(ctx: cmds.Context):
         if ctx.interaction is None:
             return
+        await ctx.interaction.response.defer()
 
-        await ctx.interaction.response.send_message("Pong!")
+        await ctx.interaction.followup.send("Pong!")
