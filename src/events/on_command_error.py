@@ -7,5 +7,5 @@ def register(soup_overlord: SoupOverlordCore):
     @soup_overlord.event
     async def on_command_error(ctx, error):
         soup_overlord.log(str(error))
-        await soup_overlord.discord_log("An error has occured. Check the logs for more information.")
+        await soup_overlord.discord_log(":warning: An error has occured. Check the logs for more information. :warning:")
         

@@ -20,7 +20,13 @@ def register(soup_overlord: SoupOverlordCore):
 
         await ctx.interaction.response.send_message("Used echo", ephemeral=True)
 
-        if channel is not None:
-            await channel.send(message)
-        else:
-            await ctx.send(message)
+        if channel is None:
+            channel = ctx.interaction.channel
+
+        await soup_overlord.discord_log(
+            f"Echoed message by `{ctx.interaction.user.display_name}` in the channel `#{channel.name}`"
+        )
+
+        await channel.send(message)
+
+

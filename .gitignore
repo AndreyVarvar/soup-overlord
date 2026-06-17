@@ -182,3 +182,5 @@ databases/
 backups/
 .DS_Store
 *.sh
+wrapped/
+*.png

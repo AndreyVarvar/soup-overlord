@@ -18,9 +18,5 @@ def register(soup_overlord: SoupOverlordCore):
         if ctx.interaction is None:
             return
 
-        message = await ctx.fetch_message(1515075234523386026)
-
-        await message.add_reaction("👍")
-
         await ctx.interaction.response.send_message('test successful', ephemeral=True)
         await soup_overlord.discord_log("The testing command was invoked and has completed successfully")

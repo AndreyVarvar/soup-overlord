@@ -13,7 +13,8 @@ from . import \
     ping, \
     music_filter, \
     music_list_top_rated, \
-    music_list_my_top_rated
+    music_list_my_top_rated, \
+    music_wrapped
 
 
 def init(soup_overlord: SoupOverlordCore):
@@ -35,5 +36,6 @@ def init(soup_overlord: SoupOverlordCore):
     music_filter.register(soup_overlord)
     music_list_top_rated.register(soup_overlord)
     music_list_my_top_rated.register(soup_overlord)
+    music_wrapped.register(soup_overlord)
 
 
