@@ -42,7 +42,7 @@ class InfoEmbed(discord.Embed):
             votes_info = f"{average(list(entry.votes.values())):.2f}"
     
         self.add_field(
-            name="Averate rating",
+            name="Average rating",
             value=votes_info,
             inline=True
         )

@@ -46,9 +46,11 @@ def register(soup_overlord: SoupOverlordCore):
         # this is the part where it's required to be performed by a moderator
         await interaction.response.send_modal(TrackInfoModal(link, message, soup_overlord))
 
+    name = 'Add music'
     add_music_context_menu = app_commands.ContextMenu(
-        name='Add music',
+        name=name,
         callback=add_music
     )
     bot.tree.add_command(add_music_context_menu)
 
+    soup_overlord.log(f"Registering `{name}` app command")

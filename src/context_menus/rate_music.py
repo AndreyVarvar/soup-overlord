@@ -50,8 +50,10 @@ def register(soup_overlord: SoupOverlordCore):
         
         await interaction.followup.send(f'What would you rate `{entry.track_name}` by `{entry.track_author}`?', view=RateMusicView(entry, voter_id, soup_overlord))
 
+    name = 'Rate music'
     rate_music_context_menu = app_commands.ContextMenu(
-        name='Rate music',
+        name=name,
         callback=rate_music
     )
     bot.tree.add_command(rate_music_context_menu)
+    soup_overlord.log(f"Registaring `{name}` app command")

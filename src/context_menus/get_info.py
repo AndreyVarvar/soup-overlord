@@ -34,8 +34,10 @@ def register(soup_overlord: SoupOverlordCore):
         await interaction.followup.send(embed=await InfoEmbed.build(soup_overlord, entry, sender))
 
 
+    name = 'Get info'
     get_rating_context_menu = app_commands.ContextMenu(
-        name='Get info',
+        name=name,
         callback=get_info
     )
     bot.tree.add_command(get_rating_context_menu)
+    soup_overlord.log(f"Registering `{name}` app command")
