@@ -17,7 +17,6 @@ class InfoEmbed(discord.Embed):
         super().__init__()
         
         self.color = discord.Color.dark_gold()
-        # self.title = f'Info for `{entry.track_name}`'
 
         self.set_author(
             name=f"Sent by: {soup_overlord.get_cached_name(entry.original_sender)}",
@@ -81,4 +80,3 @@ class InfoEmbed(discord.Embed):
             entry,
             sender
         )
-

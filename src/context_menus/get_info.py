@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 
 from src.music_database import spotify_link_in_message, get_all_links_in_message, get_link_identifier
-from src.ui.embed import InfoEmbed
+from src.ui.embeds.info_embed import InfoEmbed
 
 from src.bot_core import SoupOverlordCore
 

@@ -1,7 +1,7 @@
 from discord.ext import commands as cmds
 import discord
 
-from src.ui.embed import InfoEmbed
+from src.ui.embeds.info_embed import InfoEmbed
 
 from src.music_database import MusicDatabase
 
